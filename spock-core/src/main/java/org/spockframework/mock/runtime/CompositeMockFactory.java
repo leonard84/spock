@@ -50,7 +50,12 @@ public class CompositeMockFactory implements IMockFactory {
 
 	public Object createDetached(IMockConfiguration configuration,
 			ClassLoader classLoader) {
-		// TODO Auto-generated method stub
-		return null;
+	  for (IMockFactory factory : mockFactories) {
+      if (factory.canCreate(configuration)) {
+        return factory.createDetached(configuration, classLoader);
+      }
+    }
+
+    throw new InternalSpockError("No matching mock factory found");
 	}
 }

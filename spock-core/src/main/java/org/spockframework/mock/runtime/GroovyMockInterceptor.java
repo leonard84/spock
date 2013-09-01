@@ -40,7 +40,7 @@ public class GroovyMockInterceptor implements IProxyBasedMockInterceptor {
 
   public Object intercept(Object target, Method method, Object[] arguments, IResponseGenerator realMethodInvoker) {
     IMockObject mockObject = new MockObject(mockConfiguration.getName(), mockConfiguration.getExactType(), target,
-        mockConfiguration.isVerified(), mockConfiguration.isGlobal(), mockConfiguration.getDefaultResponse(), specification);
+        mockConfiguration.isVerified(), mockConfiguration.isGlobal(), mockConfiguration.getDefaultResponse(), specification, this);
 
     if (method.getDeclaringClass() == ISpockMockObject.class) {
       return mockObject;
@@ -84,11 +84,11 @@ public class GroovyMockInterceptor implements IProxyBasedMockInterceptor {
     return method.getName().equals(name) && Arrays.equals(method.getParameterTypes(), parameterTypes);
   }
 
-  public void attach(Specification spec) {
+  public void attach(Specification specification) {
     // NO-OP since GroovyMocks do not support detached mocks at the moment
   }
 
   public void detach() {
-    // NO-OP since GroovyMocks do not support detached mocks at the moment    
+    // NO-OP since GroovyMocks do not support detached mocks at the moment
   }
 }
