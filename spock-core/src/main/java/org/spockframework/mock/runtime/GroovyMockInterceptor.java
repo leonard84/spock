@@ -83,4 +83,12 @@ public class GroovyMockInterceptor implements IProxyBasedMockInterceptor {
   private boolean isMethod(Method method, String name, Class<?>... parameterTypes) {
     return method.getName().equals(name) && Arrays.equals(method.getParameterTypes(), parameterTypes);
   }
+
+  public void attach(Specification spec) {
+    // NO-OP since GroovyMocks do not support detached mocks at the moment
+  }
+
+  public void detach() {
+    // NO-OP since GroovyMocks do not support detached mocks at the moment    
+  }
 }
