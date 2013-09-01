@@ -47,4 +47,10 @@ public class CompositeMockFactory implements IMockFactory {
 
     throw new InternalSpockError("No matching mock factory found");
   }
+
+	public Object createDetached(IMockConfiguration configuration,
+			ClassLoader classLoader) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

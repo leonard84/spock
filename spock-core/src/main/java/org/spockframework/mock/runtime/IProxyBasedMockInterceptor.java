@@ -18,6 +18,10 @@ import java.lang.reflect.Method;
 
 import org.spockframework.mock.IResponseGenerator;
 
+import spock.lang.Specification;
+
 public interface IProxyBasedMockInterceptor {
   Object intercept(Object target, Method method, Object[] arguments, IResponseGenerator realMethodInvoker);
+  void attach(Specification spec);
+  void detach();
 }
