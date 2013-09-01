@@ -7,4 +7,10 @@
            http://www.spockframework.org/spring classpath:spock.xsd">
 
   <spock:mock id="service1" class="org.spockframework.spring.IService1"/>
+
+  <bean id="service2" class="org.spockframework.spring.xml.SpockMockFactoryBean">
+    <constructor-arg value="org.spockframework.spring.IService2"/>
+  </bean>
+
+  <bean id="nonMock" class="java.util.ArrayList"/>
 </beans>

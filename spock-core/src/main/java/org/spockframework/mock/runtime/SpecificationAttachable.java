@@ -5,6 +5,8 @@ import spock.lang.Specification;
 /**
  * The Object implementing this interface can be attached to and
  * detached from a {@link Specification}.
+ *
+ * @author Leonard Bruenings
  */
 public interface SpecificationAttachable {
 

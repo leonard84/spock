@@ -5,6 +5,14 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.w3c.dom.Element;
 
+/**
+ * Adds support for the spock:mock element.
+ *
+ * Spring integration of spock mocks is heavily inspired by
+ * Springokito {@link https://bitbucket.org/kubek2k/springockito}.
+ *
+ * @author Leonard Bruenings
+ */
 public class MockBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
   @Override

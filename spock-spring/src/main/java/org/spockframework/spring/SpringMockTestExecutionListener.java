@@ -11,6 +11,12 @@ import org.springframework.test.context.TestExecutionListener;
 
 import spock.lang.Specification;
 
+/**
+ * This {@link TestExecutionListener} takes care of attaching and detaching the
+ * mocks to the current {@link Specification}.
+ *
+ * @author Leonard Bruenings
+ */
 public class SpringMockTestExecutionListener implements TestExecutionListener {
 
   public static final String MOCKED_BEANS_LIST = "org.spockframework.spring.SpringMockTestExecutionListener.MOCKED_BEANS_LIST";

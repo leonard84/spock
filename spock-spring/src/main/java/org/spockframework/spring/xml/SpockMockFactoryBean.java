@@ -7,6 +7,14 @@ import org.spockframework.mock.MockNature;
 import org.spockframework.mock.MockUtil;
 import org.springframework.beans.factory.FactoryBean;
 
+/**
+ * Takes care of instantiating detached spock Mocks.
+ *
+ * Spring integration of spock mocks is heavily inspired by
+ * Springokito {@link https://bitbucket.org/kubek2k/springockito}.
+ *
+ * @author Leonard Bruenings
+ */
 public class SpockMockFactoryBean<T> implements FactoryBean<T> {
 
   private final Class<T> targetClass;
