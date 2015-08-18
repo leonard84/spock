@@ -1,4 +1,5 @@
 apply plugin: "spock-base"
+apply from: script("publishMaven")
 
 displayName = "Spock Framework - Report Module"
 
