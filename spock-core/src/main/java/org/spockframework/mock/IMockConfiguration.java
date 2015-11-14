@@ -3,6 +3,7 @@ package org.spockframework.mock;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import groovy.lang.Closure;
 import org.spockframework.util.Beta;
 import org.spockframework.util.Nullable;
 
@@ -71,6 +72,16 @@ public interface IMockConfiguration {
    * @return the default response strategy for the mock object
    */
   IDefaultResponse getDefaultResponse();
+
+  /**
+   * Returns the initializationClosure for this mock.
+   *
+   * This is only used for detached mocks.
+   *
+   * @return Returns the initializationClosure for this mock.
+   */
+  @Nullable
+  Closure getInitializationClosure();
 
   /**
    * Tells whether a mock object stands in for all objects of the mocked type, or just for itself.

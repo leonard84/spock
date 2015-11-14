@@ -17,8 +17,10 @@ package org.spockframework.mock;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import groovy.lang.Closure;
 import org.spockframework.mock.runtime.CompositeMockFactory;
 import org.spockframework.mock.runtime.MockConfiguration;
+import org.spockframework.runtime.GroovyRuntimeUtil;
 import org.spockframework.util.Beta;
 import org.spockframework.util.Nullable;
 
@@ -65,7 +67,12 @@ public class MockUtil {
    * @param specification the Specification to attach to
    */
   public void attachMock(Object object, Specification specification) {
-    asMock(object).attach(specification);
+    IMockObject mockObject = asMock(object);
+    mockObject.attach(specification);
+    Closure closure = mockObject.getInitializationClosure();
+    if (closure != null) {
+      GroovyRuntimeUtil.invokeClosure(closure, object);
+    }
   }
 
   /**

@@ -18,6 +18,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
+import groovy.lang.Closure;
 import org.spockframework.gentyref.GenericTypeReflector;
 import org.spockframework.mock.IMockConfiguration;
 import org.spockframework.mock.IDefaultResponse;
@@ -34,6 +35,7 @@ public class MockConfiguration implements IMockConfiguration {
   private final MockImplementation implementation;
   private final List<Object> constructorArgs;
   private final IDefaultResponse defaultResponse;
+  private final Closure initializationClosure;
   private final boolean global;
   private final boolean verified;
   private final boolean useObjenesis;
@@ -47,6 +49,7 @@ public class MockConfiguration implements IMockConfiguration {
     this.implementation = getOption(options, "implementation", MockImplementation.class, implementation);
     this.constructorArgs = getOption(options, "constructorArgs", List.class, null);
     this.defaultResponse = getOption(options, "defaultResponse", IDefaultResponse.class, this.nature.getDefaultResponse());
+    this.initializationClosure = getOption(options, "initializationClosure", Closure.class, null);
     this.global = getOption(options, "global", Boolean.class, false);
     this.verified = getOption(options, "verified", Boolean.class, this.nature.isVerified());
     this.useObjenesis = getOption(options, "useObjenesis", Boolean.class, this.nature.isUseObjenesis());
@@ -80,6 +83,11 @@ public class MockConfiguration implements IMockConfiguration {
 
   public IDefaultResponse getDefaultResponse() {
     return defaultResponse;
+  }
+
+  @Nullable
+  public Closure getInitializationClosure() {
+    return initializationClosure;
   }
 
   public boolean isGlobal() {
