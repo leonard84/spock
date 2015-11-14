@@ -1,6 +1,12 @@
 allprojects {
   apply plugin: "idea"
   apply plugin: "eclipse"
+
+  idea {
+    module {
+      outputFile = file(outputFile.path.replace(".iml", "-${variant}.iml"))
+    }
+  }
 }
 
 def gitIgnore = file(".gitignore").readLines()
@@ -10,7 +16,9 @@ topLevelDirs = topLevelDirs.collect { it.substring(1) }
 
 idea {
   project {
-    languageLevel "1.5"
+    languageLevel = "1.6"
+    vcs = "Git"
+    outputFile = file(outputFile.path.replace(".ipr", "-${variant}.ipr"))
     configure(modules) { module ->
       def prj = module.project
       excludeDirs = prj.files(allLevelDirs) as Set
@@ -19,11 +27,9 @@ idea {
         excludeDirs += (prj.files(topLevelDirs) as Set)
       }
     }
-    ipr {
-      withXml { provider ->
-        def node = provider.asNode()
-        node.component.find { it.'@name' == 'VcsDirectoryMappings' }?.mapping[0].'@vcs' = 'Git'
-      }
-    }
   }
+}
+
+ideaWorkspace {
+  outputFile = file(outputFile.path.replace(".iws", "-${variant}.iws"))
 }
