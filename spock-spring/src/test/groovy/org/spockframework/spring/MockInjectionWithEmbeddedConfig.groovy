@@ -1,7 +1,6 @@
 package org.spockframework.spring
 
-import org.spockframework.mock.MockImplementation
-import org.spockframework.mock.MockNature
+import org.spockframework.mock.DetachedMockFactory
 import org.spockframework.mock.MockUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -16,16 +15,16 @@ class MockInjectionWithEmbeddedConfig extends Specification {
 
   @Configuration
   static class Config {
-    private MockUtil mockUtil = new MockUtil()
+    private DetachedMockFactory factory = new DetachedMockFactory()
 
     @Bean
     public IService1 service1() {
-        return mockUtil.createDetachedMock("service1", IService1, MockNature.MOCK, MockImplementation.JAVA, [:], getClass().classLoader)
+        return factory.Mock(IService1, name: "service1")
     }
 
     @Bean
     public IService2 service2() {
-        return mockUtil.createDetachedMock("service2", IService2, MockNature.MOCK, MockImplementation.JAVA, [:], getClass().classLoader)
+        return factory.Mock(IService2, name: "service2")
     }
   }
 

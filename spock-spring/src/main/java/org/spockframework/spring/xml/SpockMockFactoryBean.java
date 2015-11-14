@@ -33,7 +33,7 @@ public class SpockMockFactoryBean<T> implements FactoryBean<T> {
     if (instance == null) {
       MockNature nature = MockNature.valueOf(mockNature.toUpperCase());
       instance =  new DetachedMockFactory().createMock(name, targetClass, nature, MockImplementation.JAVA,
-        Collections.<String, Object>emptyMap(), null);
+        Collections.<String, Object>emptyMap());
     }
     return instance;
   }
