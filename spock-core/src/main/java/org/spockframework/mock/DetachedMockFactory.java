@@ -10,6 +10,7 @@ import spock.lang.Specification;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,62 +23,74 @@ import java.util.Map;
 public class DetachedMockFactory implements MockFactory {
   @Override
   public <T> T Mock(Class<T> type) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.MOCK, MockImplementation.JAVA,
+      Collections.<String, Object>emptyMap(), null);
   }
 
   @Override
   public <T> T Mock(Map<String, Object> options, Class<T> type) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.MOCK, MockImplementation.JAVA,
+      options, null);
   }
 
   @Override
   public <T> T Mock(Class<T> type, Closure interactions) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.MOCK, MockImplementation.JAVA,
+      Collections.<String, Object>emptyMap(), interactions);
   }
 
   @Override
   public <T> T Mock(Map<String, Object> options, Class<T> type, Closure interactions) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.MOCK, MockImplementation.JAVA,
+      options, interactions);
   }
 
   @Override
   public <T> T Stub(Class<T> type) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.STUB, MockImplementation.JAVA,
+      Collections.<String, Object>emptyMap(), null);
   }
 
   @Override
   public <T> T Stub(Map<String, Object> options, Class<T> type) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.STUB, MockImplementation.JAVA,
+      options, null);
   }
 
   @Override
   public <T> T Stub(Class<T> type, Closure interactions) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.STUB, MockImplementation.JAVA,
+      Collections.<String, Object>emptyMap(), interactions);
   }
 
   @Override
   public <T> T Stub(Map<String, Object> options, Class<T> type, Closure interactions) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.STUB, MockImplementation.JAVA,
+      options, interactions);
   }
 
   @Override
   public <T> T Spy(Class<T> type) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.SPY, MockImplementation.JAVA,
+      Collections.<String, Object>emptyMap(), null);
   }
 
   @Override
   public <T> T Spy(Map<String, Object> options, Class<T> type) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.SPY, MockImplementation.JAVA,
+      options, null);
   }
 
   @Override
   public <T> T Spy(Class<T> type, Closure interactions) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.SPY, MockImplementation.JAVA,
+      Collections.<String, Object>emptyMap(), interactions);
   }
 
   @Override
   public <T> T Spy(Map<String, Object> options, Class<T> type, Closure interactions) {
-    return null;
+    return createMock(inferNameFromType(type), type, MockNature.SPY, MockImplementation.JAVA,
+      options, interactions);
   }
 
   @SuppressWarnings("unchecked")
@@ -88,8 +101,13 @@ public class DetachedMockFactory implements MockFactory {
       classLoader = ClassLoader.getSystemClassLoader();
     }
     if (closure != null) {
+      options = new HashMap<String, Object>(options);
       options.put("initializationClosure", closure);
     }
-    return (T)new MockUtil().createDetachedMock(name, type, nature, implementation, options, classLoader);
+    return (T) new MockUtil().createDetachedMock(name, type, nature, implementation, options, classLoader);
+  }
+
+  private String inferNameFromType(Class<?> type) {
+    return type.getSimpleName();
   }
 }
