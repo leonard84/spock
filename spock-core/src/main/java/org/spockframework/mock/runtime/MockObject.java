@@ -16,7 +16,6 @@ package org.spockframework.mock.runtime;
 
 import java.lang.reflect.Type;
 
-import groovy.lang.Closure;
 import org.spockframework.gentyref.GenericTypeReflector;
 import org.spockframework.lang.Wildcard;
 import org.spockframework.mock.IMockInteraction;
@@ -35,13 +34,11 @@ public class MockObject implements IMockObject {
   private final boolean global;
   private final IDefaultResponse defaultResponse;
   private final SpecificationAttachable mockInterceptor;
-  private final Closure initializationClosure;
 
   private Specification specification;
 
   public MockObject(@Nullable String name, Type type, Object instance, boolean verified, boolean global,
-      IDefaultResponse defaultResponse, Closure initializationClosure, Specification specification,
-      SpecificationAttachable mockInterceptor) {
+      IDefaultResponse defaultResponse, Specification specification, SpecificationAttachable mockInterceptor) {
     this.name = name;
     this.type = type;
     this.instance = instance;
@@ -50,7 +47,6 @@ public class MockObject implements IMockObject {
     this.defaultResponse = defaultResponse;
     this.specification = specification;
     this.mockInterceptor = mockInterceptor;
-    this.initializationClosure = initializationClosure;
   }
 
   @Nullable
@@ -80,11 +76,6 @@ public class MockObject implements IMockObject {
 
   public Specification getSpecification() {
     return specification;
-  }
-
-  @Override
-  public Closure getInitializationClosure() {
-    return initializationClosure;
   }
 
   public boolean matches(Object target, IMockInteraction interaction) {

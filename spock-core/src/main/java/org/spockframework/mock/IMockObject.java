@@ -14,7 +14,6 @@
 
 package org.spockframework.mock;
 
-import groovy.lang.Closure;
 import org.spockframework.mock.runtime.SpecificationAttachable;
 import org.spockframework.util.Nullable;
 
@@ -74,16 +73,6 @@ public interface IMockObject extends SpecificationAttachable {
    */
   @Nullable
   Specification getSpecification();
-
-  /**
-   * Returns the initializationClosure for this mock.
-   *
-   * This is only used for detached mocks.
-   *
-   * @return Returns the initializationClosure for this mock.
-   */
-  @Nullable
-  Closure getInitializationClosure();
 
   /**
    * Tells whether this mock object matches the target of the specified interaction.
