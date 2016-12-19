@@ -1,3 +1,34 @@
+apply plugin: 'java-gradle-plugin'
+
+sourceSets {
+  functionalTest {
+    groovy {
+      srcDir file('src/functionalTest/groovy')
+    }
+    resources {
+      srcDir file('src/functionalTest/resources')
+    }
+    compileClasspath += sourceSets.main.output + configurations.testRuntime
+    runtimeClasspath += output + compileClasspath
+  }
+}
+
+task functionalTest(type: Test) {
+  testClassesDir = sourceSets.functionalTest.output.classesDir
+  classpath = sourceSets.functionalTest.runtimeClasspath
+}
+
+check.dependsOn functionalTest
+functionalTest.mustRunAfter test
+
+gradlePlugin {
+  testSourceSets sourceSets.functionalTest
+}
+
 dependencies {
   compile gradleApi()
+  functionalTestCompile gradleTestKit()
+  functionalTestCompile (project(":spock-core")){
+    exclude module: 'groovy-all'
+  }
 }

@@ -18,6 +18,7 @@ package org.spockframework.gradle
 
 import org.gradle.api.*
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.testing.Test
 
 class SpockReportPlugin implements Plugin<Project> {
   void apply(Project project) {
@@ -33,6 +34,15 @@ class SpockReportPlugin implements Plugin<Project> {
           testRuntime "org.spockframework:spock-report:1.1-SNAPSHOT"
         }
       }
+    }
+
+    project.tasks.withType(Test) { task ->
+      def spockReport = project.task("${task.name}SpockReport", type: GenerateSpockReport, dependsOn: task) {
+        reportName task.name
+        outputDirectory project.file("${project.buildDir}/reports/spock/${task.name}")
+      }
+
+      task.finalizedBy spockReport
     }
   }
 }

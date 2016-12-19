@@ -16,31 +16,81 @@
 
 package org.spockframework.gradle
 
-import org.gradle.api.*
-import org.gradle.api.tasks.*
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
+
+@CompileStatic
 class GenerateSpockReport extends DefaultTask {
+  private Object reportName
+
   @Input
-  String reportName
+  String getReportName() {
+    reportName
+  }
+
+  void setReportName(Object reportName) {
+    this.reportName = reportName
+  }
+
+  void reportName(Object reportName) {
+    setReportName(reportName)
+  }
+
+  private String reportFileName
 
   @Input
   @Optional
-  String reportFileName
+  String getReportFileName() {
+    reportName
+  }
+
+  void setReportFileName(Object reportFileName) {
+    this.reportFileName = reportFileName
+  }
+
+  void reportFileName(Object reportFileName) {
+    setReportName(reportFileName)
+  }
+
+  private List<Object> liveLogFiles = []
 
   @Input
   @Optional
-  Iterable<File> logFiles = []
+  FileCollection getLiveLogFiles() {
+    project.files(this.liveLogFiles)
+  }
 
-  @Input
-  @Optional
-  Iterable<File> liveLogFiles = []
+  void setLiveLogFiles(Object... liveLogFiles) {
+    this.liveLogFiles.clear()
+    this.liveLogFiles.addAll(liveLogFiles as List)
+  }
 
-  @Input // should really be @InputDirectoryListing
-  @Optional
-  Iterable<File> logFileDirectories = []
+  void liveLogFiles(Object... liveLogFiles) {
+    this.liveLogFiles.addAll(liveLogFiles as List)
+  }
+
+  private Object outputDirectory
 
   @OutputDirectory
-  File outputDirectory
+  File getOutputDirectory() {
+    this.outputDirectory == null ? null : project.file(this.outputDirectory)
+  }
+
+  void setOutputDirectory(Object outputDirectory) {
+    this.outputDirectory = outputDirectory
+  }
+
+  void outputDirectory(Object outputDirectory) {
+    setOutputDirectory(outputDirectory)
+  }
 
   @Input
   boolean local = true
@@ -49,8 +99,57 @@ class GenerateSpockReport extends DefaultTask {
   boolean debug = true
 
   @InputFiles
-  Iterable<File> spockReportClasspath = []
+  private  List<Object> spockReportClasspath = []
 
+  FileCollection getSpockReportClasspath() {
+    project.files(this.spockReportClasspath)
+  }
+
+  void setSpockReportClasspath(Object... spockReportClasspath) {
+    this.spockReportClasspath.clear()
+    this.spockReportClasspath.addAll(spockReportClasspath as List)
+  }
+
+  void spockReportClasspath(Object... spockReportClasspath) {
+    this.spockReportClasspath.addAll(spockReportClasspath as List)
+  }
+
+
+  private List<Object>  logFileDirectories = []
+
+  @InputFiles // should really be @InputDirectoryListing
+  @Optional
+  FileCollection getLogFileDirectories() {
+    project.files(this.logFileDirectories)
+  }
+
+  void setLogFileDirectories(Object... logFileDirectories) {
+    this.logFileDirectories.clear()
+    this.logFileDirectories.addAll(logFileDirectories as List)
+  }
+
+  void logFileDirectories(Object... logFileDirectories) {
+    this.logFileDirectories.addAll(logFileDirectories as List)
+  }
+
+  private List<Object> logFiles = []
+
+  @InputFiles
+  @Optional
+  FileCollection getLogFiles() {
+    project.files(this.logFiles)
+  }
+
+  void setLogFiles(Object... logFiles) {
+    this.logFiles.clear()
+    this.logFiles.addAll(logFiles as List)
+  }
+
+  void logFiles(Object... logFiles) {
+    this.logFiles.addAll(logFiles as List)
+  }
+
+  @CompileDynamic
   @TaskAction
   void generate() {
     def classLoader = new URLClassLoader(getSpockReportClasspath().collect { it.toURI().toURL() } as URL[])

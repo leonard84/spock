@@ -25,7 +25,7 @@ class SpockBasePlugin implements Plugin<Project> {
       def taskName = task.name.capitalize()
       def configFile = project.file("Spock${taskName}Config.groovy")
       if (configFile.exists()) {
-        systemProperty "spock.configuration", configFile
+        task.systemProperty "spock.configuration", configFile
       }
     }
   }
