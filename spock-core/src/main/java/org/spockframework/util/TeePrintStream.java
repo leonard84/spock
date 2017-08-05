@@ -14,11 +14,15 @@
 
 package org.spockframework.util;
 
-import org.spockframework.runtime.GroovyRuntimeUtil;
-
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.spockframework.runtime.GroovyRuntimeUtil;
 
 import groovy.lang.MissingMethodException;
 

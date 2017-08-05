@@ -14,12 +14,25 @@
 
 package org.spockframework.runtime;
 
-import org.spockframework.runtime.model.*;
-import org.spockframework.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.io.*;
-import java.math.*;
-import java.util.*;
+import org.spockframework.runtime.model.FeatureInfo;
+import org.spockframework.runtime.model.SpecInfo;
+import org.spockframework.util.IoUtil;
+import org.spockframework.util.SpockUserHomeUtil;
 
 public class SpecRunHistory implements Comparable<SpecRunHistory> {
   private static final int MAX_CONFIDENCE = 5;
@@ -40,10 +53,7 @@ public class SpecRunHistory implements Comparable<SpecRunHistory> {
     try {
       data = (Data) in.readObject();
     } catch (ClassNotFoundException e) {
-      // in JDK 1.5, there is no IOException constructor that takes a cause
-      IOException io = new IOException("deserialization error");
-      io.initCause(e);
-      throw io;
+      throw  new IOException("deserialization error", e);
     } finally {
       IoUtil.closeQuietly(in);
     }

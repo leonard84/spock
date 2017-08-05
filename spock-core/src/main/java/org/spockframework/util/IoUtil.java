@@ -14,9 +14,20 @@
 
 package org.spockframework.util;
 
-import java.io.*;
-import java.net.Socket;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class IoUtil {
   public static void closeQuietly(@Nullable Closeable... closeables) {
@@ -27,19 +38,6 @@ public class IoUtil {
 
       try {
         closeable.close();
-      } catch (IOException ignored) {}
-    }
-  }
-
-  // In JDK 1.6, java.net.Socket doesn't implement Closeable, so we have this overload.
-  public static void closeQuietly(@Nullable final Socket... sockets) {
-    if (sockets == null) return;
-
-    for (Socket socket : sockets) {
-      if (socket == null) return;
-
-      try {
-        socket.close();
       } catch (IOException ignored) {}
     }
   }
