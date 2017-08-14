@@ -16,12 +16,14 @@
 
 package org.spockframework.report.log;
 
-import org.spockframework.runtime.*;
+import java.io.File;
+
+import org.spockframework.runtime.AbstractRunListener;
+import org.spockframework.runtime.AsyncStandardStreamsListener;
+import org.spockframework.runtime.StandardStreamsCapturer;
 import org.spockframework.runtime.extension.AbstractGlobalExtension;
 import org.spockframework.runtime.model.SpecInfo;
 import org.spockframework.util.IoUtil;
-
-import java.io.File;
 
 public class ReportLogExtension extends AbstractGlobalExtension {
   private final StandardStreamsCapturer streamsCapturer = new StandardStreamsCapturer();
@@ -60,8 +62,8 @@ public class ReportLogExtension extends AbstractGlobalExtension {
     File logFile = reportConfig.getLogFile();
     if (logFile != null) {
       logWriter = new ReportLogWriter(logFile);
-      logWriter.setPrefix("loadLogFile(");
-      logWriter.setPostfix(")\n\n");
+//      logWriter.setPrefix("loadLogFile(");
+//      logWriter.setPostfix(")\n\n");
       logWriter.start();
       logWriterListener = createRunListener("spock-report-log-writer", logWriter);
       logWriterListener.start();

@@ -40,11 +40,16 @@ public class ReportLogConfiguration {
   public int reportServerPort = Integer.valueOf(System.getProperty("spock.reportServerPort", "4242"));
 
   public String getLogFileSuffix() {
-    if (logFileSuffix != null && logFileSuffix.contains("#timestamp")) {
-      DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss");
-      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      String timestamp = dateFormat.format(new Date());
-      logFileSuffix = logFileSuffix.replace("#timestamp", timestamp);
+    if (logFileSuffix != null) {
+      if (logFileSuffix.contains("#timestamp")) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String timestamp = dateFormat.format(new Date());
+        logFileSuffix = logFileSuffix.replace("#timestamp", timestamp);
+      }
+      if (logFileSuffix.contains("#workerid") && (System.getProperty("org.gradle.test.worker") != null)) {
+        logFileSuffix = logFileSuffix.replace("#workerid", System.getProperty("org.gradle.test.worker"));
+      }
     }
     return logFileSuffix;
   }
