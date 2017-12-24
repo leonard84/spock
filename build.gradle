@@ -43,8 +43,9 @@ ext {
   }
   fullVersion = baseVersion + ((!snapshotVersion && releaseCandidate) ? "-rc-$releaseCandidate" : "") + "-groovy-$variant" + (snapshotVersion ? "-SNAPSHOT" : '')
     variantLessVersion = baseVersion + (snapshotVersion ? "-SNAPSHOT" : (releaseCandidate ? "-rc-$releaseCandidate" : ""))
-  javaVersions = [1.7, 1.8]
+  javaVersions = [1.7, 1.8, 9, 10, 11]
   javaVersion = System.getProperty("java.specification.version") as BigDecimal
+  releaseVersion = javaVersions.min().toString().split(/\./)[-1]
   libs = [
     jetbrainsAnnotations: "org.jetbrains:annotations:13.0",
     ant: "org.apache.ant:ant:1.9.7",
@@ -70,11 +71,25 @@ allprojects {
 
   apply from: script("common")
 
-  if (javaVersion >= 1.8) {
+  if (javaVersion == 1.8) {
     tasks.withType(Javadoc) {
       options.addStringOption('Xdoclint:none', '-quiet')
       options.noTimestamp()
     }
+  } else if (javaVersion >= 9){
+    tasks.withType(JavaCompile) {
+      sourceCompatibility = javaVersions.min()
+      targetCompatibility = javaVersions.min()
+      options.compilerArgs += ['--release', releaseVersion]
+      options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Javadoc) {
+      options.addStringOption('-release', releaseVersion)
+      options.addStringOption('Xdoclint:none', '-quiet')
+      options.noTimestamp()
+    }
+
   }
 }
 
