@@ -37,4 +37,9 @@ public class RegexPropertyNameConstraint implements IInvocationConstraint {
         method.getName(), method.getParameterTypes(), method.getReturnType());
     return propertyName != null && pattern.matcher(propertyName).matches();
   }
+
+  @Override
+  public String describeMismatch(IMockInvocation invocation) {
+    return null;
+  }
 }

@@ -33,4 +33,9 @@ public class NegatingArgumentConstraint implements IArgumentConstraint {
   public boolean isSatisfiedBy(Object arg) {
     return !constraint.isSatisfiedBy(arg);
   }
+
+  @Override
+  public String describeMismatch(Object arg) {
+    return "<not> "+constraint.describeMismatch(arg); // TODO revisit
+  }
 }

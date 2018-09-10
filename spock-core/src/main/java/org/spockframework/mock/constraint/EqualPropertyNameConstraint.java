@@ -34,4 +34,9 @@ public class EqualPropertyNameConstraint implements IInvocationConstraint {
     return propertyName.equals(GroovyRuntimeUtil.getterMethodToPropertyName(
         method.getName(), method.getParameterTypes(), method.getReturnType()));
   }
+
+  @Override
+  public String describeMismatch(IMockInvocation invocation) {
+    return null;
+  }
 }

@@ -47,6 +47,11 @@ public class NamedArgumentListConstraint implements IInvocationConstraint {
     return matchesArgList(new ArrayList<>(args));
   }
 
+  @Override
+  public String describeMismatch(IMockInvocation invocation) {
+    return null;
+  }
+
   private boolean matchesArgList(List<Object> args) {
     nextMatcher:
     for (int i = 0; i < argConstraints.size(); i++) {

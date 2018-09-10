@@ -19,6 +19,8 @@ package org.spockframework.smoke.mock
 import org.spockframework.EmbeddedSpecification
 import org.spockframework.mock.TooFewInvocationsError
 
+import org.hamcrest.CoreMatchers
+
 class TooFewInvocations extends EmbeddedSpecification {
   def "shows unmatched invocations, ordered by similarity"() {
     when:
@@ -155,6 +157,107 @@ then:
     !e.message.contains("list.add(1)")
   }
 
+  def "can describe string argument mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.wife("Fred", "Flintstone", 30, "Quarry")
+
+then:
+1 * fred.wife("Wilma", "Flintstone", 30, "Bedrock")
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
+  def "can describe code argument mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.wife("Wilma", "Flintstone", 30, "Bedrock")
+
+then:
+1 * fred.wife("Wilma", "Flintstone", { it < 30}, "Bedrock")
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
+  def "can describe hamcrest matcher argument mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.addClassImport(CoreMatchers)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.wife("Wilma", "Flintstone", 30, "Bedrock")
+
+then:
+1 * fred.wife("Wilma", "Flintstone", CoreMatchers.equalTo(20), "Bedrock")
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
+  def "can describe type argument mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.wife("Wilma", "Flintstone", 30, "Bedrock")
+
+then:
+1 * fred.wife("Wilma", "Flintstone", _ as String, _ as String)
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
   def "can compute similarity between an interaction and a completely different invocation (without blowing up)"() {
     when:
     runner.addClassImport(Person)
@@ -196,5 +299,9 @@ then:
   static class Person {
     String name
     int age
+
+    String wife(String firstName, String surname, int age, String address){
+      return ''
+    }
   }
 }

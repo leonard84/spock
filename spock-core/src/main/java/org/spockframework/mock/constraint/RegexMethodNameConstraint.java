@@ -35,4 +35,9 @@ public class RegexMethodNameConstraint implements IInvocationConstraint {
   public boolean isSatisfiedBy(IMockInvocation invocation) {
     return pattern.matcher(invocation.getMethod().getName()).matches();
   }
+
+  @Override
+  public String describeMismatch(IMockInvocation invocation) {
+    return null;
+  }
 }
