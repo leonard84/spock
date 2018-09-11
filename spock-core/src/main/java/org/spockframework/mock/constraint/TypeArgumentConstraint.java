@@ -43,9 +43,8 @@ public class TypeArgumentConstraint implements IArgumentConstraint {
     if (type.isInstance(argument)) {
       return constraint.describeMismatch(argument);
     }
-    Condition condition = new Condition(CollectionUtil.<Object>listOf(
-      argument == null ? null : argument.getClass(), type, false),
-      "type == expected", null, null,
+    Condition condition = new Condition(CollectionUtil.listOf(  argument, type, false),
+      String.format("argument instanceof %s", type.getName()), null, null,
       null, null);
     return condition.getRendering();
   }

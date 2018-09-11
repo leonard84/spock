@@ -258,6 +258,81 @@ Unmatched invocations (ordered by similarity):
     """.trim()
   }
 
+  def "can describe type not enough args"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.wife("Wilma", "Flintstone", 30, "Bedrock")
+
+then:
+1 * fred.wife("Wilma", "Flintstone",30, "Bedrock", _ as String)
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
+  def "can describe type too many args"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.wife("Wilma", "Flintstone", 30, "Bedrock")
+
+then:
+1 * fred.wife("Wilma", "Flintstone",30)
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
+  def "can describe regex name mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.wife("Wilma", "Flintstone", 30, "Bedrock")
+
+then:
+1 * fred./kids?/("Wilma", "Flintstone", 30, "Bedrock")
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
   def "can compute similarity between an interaction and a completely different invocation (without blowing up)"() {
     when:
     runner.addClassImport(Person)

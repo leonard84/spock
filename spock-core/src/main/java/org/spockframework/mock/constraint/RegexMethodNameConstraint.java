@@ -17,6 +17,8 @@
 package org.spockframework.mock.constraint;
 
 import org.spockframework.mock.*;
+import org.spockframework.runtime.Condition;
+import org.spockframework.util.CollectionUtil;
 
 import java.util.regex.Pattern;
 
@@ -38,6 +40,9 @@ public class RegexMethodNameConstraint implements IInvocationConstraint {
 
   @Override
   public String describeMismatch(IMockInvocation invocation) {
-    return null;
+    Condition condition = new Condition(CollectionUtil.<Object>listOf(invocation.getMethod().getName(), pattern.pattern(), false),
+      String.format("methodName ==~ /%s/", pattern.pattern()), null, null,
+      null, null);
+    return condition.getRendering();
   }
 }
