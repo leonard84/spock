@@ -308,7 +308,7 @@ Unmatched invocations (ordered by similarity):
     """.trim()
   }
 
-  def "can describe regex name mismatch"() {
+  def "can describe regex method name mismatch"() {
     when:
     runner.addClassImport(Person)
     runner.runFeatureBody("""
@@ -332,6 +332,108 @@ Unmatched invocations (ordered by similarity):
 
     """.trim()
   }
+
+  def "can describe regex property name mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+def name = fred.age
+
+then:
+1 * fred./name?/
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
+
+  def "can describe property name mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+def name = fred.age
+
+then:
+1 * fred.name
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
+  def "can describe namedArgument on normal method mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.wife("Wilma", "Flintstone", 30, "Bedrock")
+
+then:
+1 * fred.wife(firstName: "Wilma", surname: "Flintstone", age: _ as String, address: _ as String)
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
+  def "can describe namedArgument on map method mismatch"() {
+    when:
+    runner.addClassImport(Person)
+    runner.runFeatureBody("""
+def fred = Mock(Person)
+
+when:
+fred.familiy(firstName: "Wilma", surname: "Flintstone", age: 30, address: "Quarry")
+
+then:
+1 * fred.familiy(firstName: "Wilma", surname: "Flintstone", age: _ as String, address: "Bedrock")
+    """)
+
+    then:
+    TooFewInvocationsError e = thrown()
+    e.message.trim() == """
+Too few invocations for:
+
+1 * fred.wife("Fred", "Flintstone", 30, "Quarry")   (0 invocations)
+
+Unmatched invocations (ordered by similarity):
+
+    """.trim()
+  }
+
 
   def "can compute similarity between an interaction and a completely different invocation (without blowing up)"() {
     when:
@@ -376,6 +478,10 @@ then:
     int age
 
     String wife(String firstName, String surname, int age, String address){
+      return ''
+    }
+
+    String familiy(Map args) {
       return ''
     }
   }

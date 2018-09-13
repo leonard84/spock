@@ -47,4 +47,6 @@ public @interface PendingFeature {
    * @return array of Exception classes to ignore.
    */
   Class<? extends Throwable>[] exceptions() default {Exception.class};
+
+  String reason() default "";
 }
