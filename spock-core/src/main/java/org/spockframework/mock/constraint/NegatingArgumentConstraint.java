@@ -36,6 +36,7 @@ public class NegatingArgumentConstraint implements IArgumentConstraint {
 
   @Override
   public String describeMismatch(Object arg) {
-    return "<expected nested condition to be false>";
+    // TODO revisit description
+    return "<not> " + constraint.getClass().getSimpleName().replace("Constraint", "") +" (matched)";
   }
 }

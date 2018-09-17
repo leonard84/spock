@@ -40,6 +40,78 @@ class ArgumentMatching extends Specification {
       arg2 << [1.0, [3,2,1] as Set, null]
   }
 
+  def "match instanceof argument"() {
+    List list = Mock()
+
+    when:
+    list.add('foo')
+    then:
+    1 * list.add(_ as String)
+  }
+
+  def "match code argument"() {
+    List list = Mock()
+
+    when:
+    list.add('foo')
+    then:
+    1 * list.add({ it.length() > 1 })
+  }
+
+  def "match code argument with type"() {
+    List list = Mock()
+
+    when:
+    list.add('foo')
+    then:
+    1 * list.add({ it.length() > 1 } as String)
+  }
+
+  def "match negate null argument argument"() {
+    List list = Mock()
+
+    when:
+    list.add('foo')
+    then:
+    1 * list.add(!null)
+  }
+
+  def "match negate other argument  argument"() {
+    List list = Mock()
+
+    when:
+    list.add('foo')
+    then:
+    1 * list.add(!'bar')
+  }
+
+  def "match negate code argument  argument"() {
+    List list = Mock()
+
+    when:
+    list.add('foo')
+    then:
+    1 * list.add(!{ it.length() < 1 })
+  }
+
+  def "match negate type argument  argument"() {
+    List list = Mock()
+
+    when:
+    list.add('foo')
+    then:
+    1 * list.add(!(_ as List))
+  }
+
+  def "match negate code argument with type"() {
+    List list = Mock()
+
+    when:
+    list.add('foo')
+    then:
+    1 * list.add(!({ it.length() == 1 } as String))
+  }
+
   def "match empty argument list"() {
     List list = Mock()
 
@@ -111,6 +183,60 @@ class ArgumentMatching extends Specification {
 
     when: na.m([foo: 'bar'], 'test')
     then: 1 * na.m([foo:  _ as String], 'test')
+  }
+
+  def "match empty (w/ varargs)"() {
+    Varargs2 varargs = Mock()
+
+    when:
+    varargs.m()
+
+    then:
+    1 * varargs.m()
+  }
+
+  def "match one (w/ varargs)"() {
+    Varargs2 varargs = Mock()
+
+    when:
+    varargs.m('one')
+
+    then:
+    1 * varargs.m('one')
+  }
+
+  def "match multi (w/ varargs)"() {
+    Varargs2 varargs = Mock()
+
+    when:
+    varargs.m('one', 'two', 'three', 'four')
+
+    then:
+    1 * varargs.m('one', 'two', 'three', 'four')
+  }
+
+  def "match multi matcher (w/ varargs)"() {
+    Varargs2 varargs = Mock()
+
+    when:
+    varargs.m('one', 'two', 'three', 'four')
+
+    then:
+    1 * varargs.m('one', _ as String, !null, { it.length() > 1 })
+  }
+
+  def "match multi spread matcher (w/ varargs)"() {
+    Varargs2 varargs = Mock()
+
+    when:
+    varargs.m()
+    varargs.m('one')
+    varargs.m('one', 'two')
+    varargs.m('one', 'two', 'three')
+    varargs.m('one', 'two', 'three', 'four')
+
+    then:
+    5 * varargs.m(*_)
   }
 
   @FailsWith(TooFewInvocationsError)
