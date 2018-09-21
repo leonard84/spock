@@ -14,9 +14,9 @@
 
 package org.spockframework.smoke.mock
 
-import java.lang.reflect.Modifier
-
 import spock.lang.Specification
+
+import java.lang.reflect.Modifier
 
 class GroovySpiesThatAreGlobal extends Specification {
   def "mock instance method"() {
@@ -205,6 +205,19 @@ class GroovySpiesThatAreGlobal extends Specification {
 
     then:
     1 * new Person("fred", 42)
+    1 * new Person("barney", 21)
+    0 * _
+  }
+
+  def "mock bean constructor"() {
+    GroovySpy(Person, global: true)
+
+    when:
+    new Person(name: "fred", age: 42)
+    new Person("barney", 21)
+
+    then:
+    1 * new Person(name: "fred", age: 42)
     1 * new Person("barney", 21)
     0 * _
   }
