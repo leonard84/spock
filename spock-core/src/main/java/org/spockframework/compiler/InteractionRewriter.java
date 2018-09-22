@@ -313,11 +313,21 @@ public class InteractionRewriter {
     }
 
     if (arg instanceof ClosureExpression) {
-      call(InteractionBuilder.ADD_CODE_ARG, arg);
+      call(InteractionBuilder.ADD_CODE_ARG, toImplicitConditionClosure((ClosureExpression) arg));
       return;
     }
 
     call(InteractionBuilder.ADD_EQUAL_ARG, arg);
+  }
+
+  private Expression toImplicitConditionClosure(ClosureExpression arg) {
+    final SpecialMethodCall specialMethodCall = new SpecialMethodCall("isSatisfiedBy", null, null, null, null, arg, true);
+    new DeepBlockRewriter(resources) {
+      {
+        currSpecialMethodCall = specialMethodCall;
+      }
+    }.doVisitClosureExpression(arg);
+    return arg;
   }
 
   private void addResponses() {

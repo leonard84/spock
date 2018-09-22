@@ -31,6 +31,7 @@ public class TooManyInvocationsError extends InteractionNotSatisfiedError {
 
   private final transient IMockInteraction interaction;
   private final transient List<IMockInvocation> acceptedInvocations;
+  private transient int recursionLevel = 0;
   private String message;
 
   public TooManyInvocationsError(IMockInteraction interaction, List<IMockInvocation> acceptedInvocations) {
@@ -49,6 +50,9 @@ public class TooManyInvocationsError extends InteractionNotSatisfiedError {
   @Override
   public synchronized String getMessage() {
     if (message != null) return message;
+    if (recursionLevel++ > 0) {
+      return "<Recursion detected; breaking out>";
+    }
 
     IMultiset<IMockInvocation> uniqueInvocations = new LinkedHashMultiset<>();
     for (IMockInvocation invocation : CollectionUtil.reverse(acceptedInvocations)) {
@@ -74,6 +78,7 @@ public class TooManyInvocationsError extends InteractionNotSatisfiedError {
     builder.append("\n");
 
     message = builder.toString();
+    recursionLevel = 0;
     return message;
   }
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
