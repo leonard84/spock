@@ -35,7 +35,8 @@ public class CodeArgumentConstraint implements IArgumentConstraint {
   @Override
   public boolean isSatisfiedBy(Object argument) {
     try {
-      return GroovyRuntimeUtil.isTruthy(GroovyRuntimeUtil.invokeClosure(code, argument));
+      GroovyRuntimeUtil.invokeClosure(code, argument);
+      return true;
     } catch (AssertionError ignore) {
       return false;
     }
@@ -44,7 +45,7 @@ public class CodeArgumentConstraint implements IArgumentConstraint {
   @Override
   public String describeMismatch(Object argument) {
     try {
-      GroovyRuntimeUtil.isTruthy(GroovyRuntimeUtil.invokeClosure(code, argument));
+      GroovyRuntimeUtil.invokeClosure(code, argument);
     } catch (AssertionError ae) {
       return ae.getMessage();
     }
