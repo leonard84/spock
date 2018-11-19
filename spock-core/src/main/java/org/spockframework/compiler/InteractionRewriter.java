@@ -75,7 +75,7 @@ public class InteractionRewriter {
     }
   }
 
-  private boolean isInteraction(ExpressionStatement stat) throws InvalidSpecCompileException {
+  public boolean isInteraction(ExpressionStatement stat) throws InvalidSpecCompileException {
     this.stat = stat;
 
     Expression expr = parseCount(parseResults(stat.getExpression()));
@@ -313,21 +313,11 @@ public class InteractionRewriter {
     }
 
     if (arg instanceof ClosureExpression) {
-      call(InteractionBuilder.ADD_CODE_ARG, toImplicitConditionClosure((ClosureExpression) arg));
+      call(InteractionBuilder.ADD_CODE_ARG, arg);
       return;
     }
 
     call(InteractionBuilder.ADD_EQUAL_ARG, arg);
-  }
-
-  private Expression toImplicitConditionClosure(ClosureExpression arg) {
-    final SpecialMethodCall specialMethodCall = new SpecialMethodCall("isSatisfiedBy", null, null, null, null, arg, true);
-    new DeepBlockRewriter(resources) {
-      {
-        currSpecialMethodCall = specialMethodCall;
-      }
-    }.doVisitClosureExpression(arg);
-    return arg;
   }
 
   private void addResponses() {

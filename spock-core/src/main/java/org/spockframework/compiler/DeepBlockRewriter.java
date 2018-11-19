@@ -40,6 +40,7 @@ import org.codehaus.groovy.syntax.Types;
  */
 public class DeepBlockRewriter extends AbstractDeepBlockRewriter {
   private final IRewriteResources resources;
+  private boolean insideInteraction = false;
 
   public DeepBlockRewriter(IRewriteResources resources) {
     super(resources.getCurrentBlock());
@@ -61,11 +62,42 @@ public class DeepBlockRewriter extends AbstractDeepBlockRewriter {
 
   @Override
   protected void doVisitExpressionStatement(ExpressionStatement stat) {
-    super.doVisitExpressionStatement(stat);
+    if(isInterationExpression(stat)) {
+      insideInteraction = true;
+      super.doVisitExpressionStatement(stat);
+      insideInteraction = false;
+    } else  {
+      super.doVisitExpressionStatement(stat);
+    }
 
     boolean handled = (stat == lastSpecialMethodCallStat && !(currSpecialMethodCall.isWithCall() || currSpecialMethodCall.isGroupConditionBlock())) // don't process further
         || handleInteraction(stat)
         || handleImplicitCondition(stat);
+  }
+
+  @Override
+  protected void doVisitBinaryExpression(BinaryExpression expression) {
+    if(insideInteraction) {
+      Expression expr = expression;
+      insideInteraction = false;
+      boolean found = false;
+      while (expr instanceof BinaryExpression) {
+        BinaryExpression binExpr = (BinaryExpression) expr;
+        int type = binExpr.getOperation().getType();
+        if (type != Types.RIGHT_SHIFT && type != Types.RIGHT_SHIFT_UNSIGNED) break;
+        found = true;
+        binExpr.getRightExpression().visit(this);
+        expr = binExpr.getLeftExpression();
+      }
+      insideInteraction = true;
+      if(found) {
+        expr.visit(this);
+      } else {
+        super.doVisitBinaryExpression(expression);
+      }
+    } else {
+      super.doVisitBinaryExpression(expression);
+    }
   }
 
   @Override
@@ -142,7 +174,8 @@ public class DeepBlockRewriter extends AbstractDeepBlockRewriter {
     if (!(stat == currTopLevelStat && isThenOrExpectBlock()
         || currSpecialMethodCall.isWithCall()
         || currSpecialMethodCall.isConditionBlock()
-        || currSpecialMethodCall.isGroupConditionBlock())) {
+        || currSpecialMethodCall.isGroupConditionBlock()
+        || insideInteraction)) {
       return false;
     }
     if (!isImplicitCondition(stat)) return false;
@@ -281,6 +314,14 @@ public class DeepBlockRewriter extends AbstractDeepBlockRewriter {
 
   private boolean isThenOrExpectBlock() {
     return (block instanceof ThenBlock || block instanceof ExpectBlock);
+  }
+
+  private boolean isInterationExpression(ExpressionStatement stat) {
+    try {
+      return new InteractionRewriter(resources, getCurrentWithOrMockClosure()).isInteraction(stat);
+    } catch (InvalidSpecCompileException e) {
+      return false;
+    }
   }
 
   // assumption: not already an interaction
