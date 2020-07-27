@@ -16,9 +16,9 @@
 
 package org.spockframework.runtime.extension;
 
-import java.lang.annotation.Annotation;
-
 import org.spockframework.runtime.model.*;
+
+import java.lang.annotation.Annotation;
 
 /**
  *
@@ -30,4 +30,24 @@ public interface IAnnotationDrivenExtension<T extends Annotation> {
   void visitFixtureAnnotation(T annotation, MethodInfo fixtureMethod);
   void visitFieldAnnotation(T annotation, FieldInfo field);
   void visitSpec(SpecInfo spec);
+  default void visitSpecAnnotation(T[] annotations, SpecInfo spec){
+    for (T annotation : annotations) {
+      visitSpecAnnotation(annotation, spec);
+    }
+  }
+  default void visitFeatureAnnotation(T[] annotations, FeatureInfo feature) {
+    for (T annotation : annotations) {
+      visitFeatureAnnotation(annotation, feature);
+    }
+  }
+  default void visitFixtureAnnotation(T[] annotations, MethodInfo fixtureMethod) {
+    for (T annotation : annotations) {
+      visitFixtureAnnotation(annotation, fixtureMethod);
+    }
+  }
+  default void visitFieldAnnotation(T[] annotations, FieldInfo field) {
+    for (T annotation : annotations) {
+      visitFieldAnnotation(annotation, field);
+    }
+  }
 }
