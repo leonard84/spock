@@ -51,7 +51,7 @@ class SpringSpyWithAopProxyTests extends Specification {
     reason = 'Spring before 5.0.0.RELEASE has an incompatibility with ByteBuddy',
     value = {
       (SpringVersion.getVersion().split(/\./, 2).first().toInteger() < 5) &&
-        !sys.'org.spockframework.mock.ignoreByteBuddy'?.toBoolean()
+        !sys.'cglibOnClasspath'?.toBoolean()
     })
   def 'verify use proxyTarget'() throws Exception {
     when:

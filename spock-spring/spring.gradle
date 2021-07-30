@@ -11,6 +11,28 @@ if (springVersion.startsWith("2.")) {
   sourceSets.test.groovy.exclude "**/*ContextHierarchyExample.groovy"
 }
 
+sourceSets {
+  byteBuddyTest {
+    compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
+    runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
+  }
+  cglibTest {
+    compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
+    runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
+  }
+}
+
+configurations {
+  byteBuddyTestImplementation.extendsFrom testImplementation
+  byteBuddyTestRuntimeOnly.extendsFrom testRuntimeOnly
+  cglibTestImplementation.extendsFrom testImplementation
+  cglibTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
 dependencies {
   api project(":spock-core")
   implementation "org.springframework:spring-test:$springVersion", provided
@@ -26,10 +48,25 @@ dependencies {
 
   testRuntimeOnly libs.h2database
   testRuntimeOnly libs.log4j
+  byteBuddyTestRuntimeOnly (project(":spock-core")) {
+    capabilities {
+      requireCapability "org.spockframework:spock-core-byte-buddy"
+    }
+  }
+  cglibTestRuntimeOnly (project(":spock-core")) {
+    capabilities {
+      requireCapability "org.spockframework:spock-core-cglib"
+    }
+  }
+}
+
+tasks.test {
+  classpath = sourceSets.byteBuddyTest.runtimeClasspath
 }
 
 task testCglib(type: Test) {
-  systemProperty("org.spockframework.mock.ignoreByteBuddy", "true")
+  systemProperty("cglibOnClasspath", "true")
+  classpath = sourceSets.cglibTest.runtimeClasspath
   mustRunAfter test
 }
 

@@ -21,7 +21,7 @@ dependencies {
 
 def codeGenerationLibraries = [
   cglib: configurations.cglib,
-  ByteBuddy: configurations.bytebuddy
+  byteBuddy: configurations.bytebuddy
 ]
 
 codeGenerationLibraries.each { key, config ->

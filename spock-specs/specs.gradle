@@ -16,16 +16,17 @@ dependencies {
   testImplementation libs.jetbrainsAnnotations
   testImplementation libs.junitPlatformTestkit
 
-  testImplementation project(":spock-core")
+  testImplementation (project(":spock-core")) {
+    capabilities {
+      requireCapability "org.spockframework:spock-core-byte-buddy"
+    }
+  }
   testImplementation libs.groovySql  //for groovy.sql.Sql
   testImplementation(libs.groovyTest) {  //for groovy.test.NotYetImplemented
     exclude group: 'junit'
   }
 
   testRuntimeOnly libs.asm
-  testRuntimeOnly libs.bytebuddy
-  testRuntimeOnly libs.cglib
-  testRuntimeOnly libs.objenesis
   testRuntimeOnly libs.h2database
 
   groovyConsole groovyConsoleExtraDependencies

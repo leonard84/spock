@@ -1,5 +1,3 @@
-import aQute.bnd.gradle.BundleTaskConvention
-import aQute.bnd.gradle.FileSetRepositoryConvention
 import aQute.bnd.gradle.Resolve
 
 plugins {
@@ -17,6 +15,26 @@ Spock is inspired from JUnit, jMock, RSpec, Groovy, Scala, Vulcans, and other fa
 
 configurations { coreConsoleRuntime }
 
+sourceSets {
+  byteBuddy
+  cglib
+}
+
+java {
+  registerFeature('byteBuddy') {
+    capability(project.group, "spock-core-byte-buddy", project.version)
+    capability(project.group, "spock-core-class-mocking", project.version)
+    usingSourceSet(sourceSets.byteBuddy)
+  }
+  registerFeature('cglib') {
+    capability(project.group, "spock-core-cglib", project.version)
+    capability(project.group, "spock-core-class-mocking", project.version)
+    capability(libs.bytebuddy.group, libs.bytebuddy.name, libs.bytebuddy.version)
+    usingSourceSet(sourceSets.cglib)
+  }
+}
+
+
 dependencies {
   api libs.groovy // easiest way to add Groovy dependency to POM
   api libs.junitPlatform
@@ -28,9 +46,15 @@ dependencies {
   implementation libs.junitPlatformTestkit, optional
   implementation libs.jetbrainsAnnotations, optional
   implementation libs.asm, optional
-  implementation libs.bytebuddy, optional
-  implementation libs.cglib, optional
-  implementation libs.objenesis, optional
+  compileOnly libs.bytebuddy
+  compileOnly libs.objenesis
+  compileOnly libs.cglib
+  byteBuddyApi project(":spock-core")
+  byteBuddyImplementation libs.bytebuddy
+  byteBuddyImplementation libs.objenesis
+  cglibApi project(":spock-core")
+  cglibImplementation libs.cglib
+  cglibImplementation libs.objenesis
 
 
   coreConsoleRuntime groovyConsoleExtraDependencies
@@ -74,7 +98,7 @@ processResources {
 }
 
 task coreConsole(type: JavaExec,
-                 description: 'Start a groovy Console with Spock Core Classpath, useful for AST-Inspection') {
+  description: 'Start a groovy Console with Spock Core Classpath, useful for AST-Inspection') {
   main = variant == 2.5 ? "groovy.ui.Console" : "groovy.console.ui.Console"
   classpath = sourceSets.main.runtimeClasspath + configurations.coreConsoleRuntime
   workingDir = file('build/console')
