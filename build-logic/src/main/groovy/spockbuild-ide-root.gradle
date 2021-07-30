@@ -1,12 +1,5 @@
-allprojects {
-  apply plugin: "idea"
-  apply plugin: "eclipse"
-
-  idea {
-    module {
-      outputFile = file(outputFile.path.replace(".iml", "-${variant}.iml"))
-    }
-  }
+plugins {
+  id "spockbuild-ide"
 }
 
 def gitIgnore = file(".gitignore").readLines()

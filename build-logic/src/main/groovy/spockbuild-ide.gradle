@@ -1,0 +1,10 @@
+plugins {
+  id "idea"
+  id "eclipse"
+}
+
+idea {
+  module {
+    outputFile = file(outputFile.path.replace(".iml", "-${variant}.iml"))
+  }
+}

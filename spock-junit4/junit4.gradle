@@ -1,4 +1,6 @@
-apply from: script("publishMaven")
+plugins {
+  id "spockbuild-publish-module"
+}
 
 ext.displayName = "Spock Framework - JUnit 4"
 

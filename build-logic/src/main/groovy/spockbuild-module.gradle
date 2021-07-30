@@ -1,0 +1,73 @@
+id {
+  id "java-library"
+  id "groovy"
+  id "jacoco"
+  id "spockbuild-common"
+}
+
+sourceCompatibility = javaVersions.min()
+targetCompatibility = javaVersions.min()
+
+sourceSets.all { ss ->
+  for (v in variants.findAll { it <= variant } ) {
+    java {
+      srcDir "src/${ss.name}$v/java"
+    }
+    groovy {
+      srcDir "src/${ss.name}$v/groovy"
+    }
+  }
+}
+
+sourceSets.all { ss ->
+  for (jv in javaVersions.findAll { it <= javaVersion } ) {
+    java {
+      srcDir "src/${ss.name}.java$jv/java"
+    }
+    groovy {
+      srcDir "src/${ss.name}.java$jv/groovy"
+    }
+  }
+}
+
+configurations {
+  all*.exclude module: "junit-dep"
+}
+
+dependencies {
+  implementation(platform(libs.junitBom))
+  implementation(project.name == "spock-gradle" ? [] : libs.groovy)
+}
+
+configureJavadoc(javadoc)
+configureGroovydoc(groovydoc)
+
+task sourcesJar(type: Jar) {
+  classifier "sources"
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+  classifier "javadoc"
+  from javadoc
+}
+
+tasks.withType(Test) {
+  useJUnitPlatform()
+  def taskName = name
+  reports {
+    junitXml {
+      destination = file("$destination/$taskName-$variant")
+    }
+    html {
+      destination = file("$destination/$taskName-$variant")
+    }
+  }
+  //Required for building on Travis' container-based infrastructure to not be killed with
+  //'exit code 137' - https://github.com/travis-ci/travis-ci/issues/5582
+  jvmArgs '-Xmx512m'
+}
+
+jacoco {
+  toolVersion = libs.jacocoAgent.version
+}

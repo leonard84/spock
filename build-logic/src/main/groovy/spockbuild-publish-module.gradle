@@ -1,0 +1,4 @@
+plugins {
+  id "spockbuild-module"
+  id "spockbuild-publish"
+}

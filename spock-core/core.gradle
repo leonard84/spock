@@ -4,9 +4,9 @@ import aQute.bnd.gradle.Resolve
 
 plugins {
   id "biz.aQute.bnd.builder"
+  id "spockbuild-publish-module"
 }
 
-apply from: script("publishMaven")
 
 ext.displayName = "Spock Framework - Core Module"
 

@@ -1,4 +1,7 @@
-apply from: script("publishMaven")
+plugins {
+  id "spockbuild-common"
+  id "spockbuild-publish"
+}
 
 def modifyBom = { xml ->
   def projectNode = xml.asNode()
