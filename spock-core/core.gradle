@@ -43,15 +43,17 @@ dependencies {
     api project(':spock-groovy2-compat')
   }
 
+  implementation libs.asm
   implementation libs.junitPlatformTestkit, optional
   implementation libs.jetbrainsAnnotations, optional
-  implementation libs.asm, optional
   compileOnly libs.bytebuddy
   compileOnly libs.objenesis
   compileOnly libs.cglib
+
   byteBuddyApi project(":spock-core")
   byteBuddyImplementation libs.bytebuddy
   byteBuddyImplementation libs.objenesis
+
   cglibApi project(":spock-core")
   cglibImplementation libs.cglib
   cglibImplementation libs.objenesis

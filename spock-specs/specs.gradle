@@ -26,7 +26,6 @@ dependencies {
     exclude group: 'junit'
   }
 
-  testRuntimeOnly libs.asm
   testRuntimeOnly libs.h2database
 
   groovyConsole groovyConsoleExtraDependencies

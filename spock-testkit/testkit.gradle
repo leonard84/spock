@@ -11,11 +11,6 @@ ext.displayName = "Spock Framework - Temp Specs for Core Module"
 dependencies {
   api project(":spock-core")
 
-  testRuntimeOnly libs.asm
-  testRuntimeOnly libs.bytebuddy
-  testRuntimeOnly libs.cglib
-  testRuntimeOnly libs.objenesis
-  testRuntimeOnly libs.h2database
   testRuntimeOnly libs.junitPlatformConsole
   testImplementation libs.junitPlatformTestkit
 
