@@ -14,9 +14,9 @@
 
 package org.spockframework.builder;
 
-import org.spockframework.gentyref.GenericTypeReflector;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.spockframework.runtime.GroovyRuntimeUtil;
-import org.spockframework.util.MopUtil;
+import org.spockframework.util.*;
 
 import java.lang.reflect.*;
 
@@ -36,7 +36,7 @@ public class SetterLikeSlot implements ISlot {
   @Override
   public Type getType() {
     Method m = MopUtil.methodFor(setterLikeMethod);
-    return m != null ? GenericTypeReflector.getExactParameterTypes(m, ownerType)[0] :
+    return m != null ? ReflectionUtil.getResolvedParameterTypes(m, ownerType).get(0) :
         setterLikeMethod.getNativeParameterTypes()[0];
   }
 

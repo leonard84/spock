@@ -14,7 +14,7 @@
 
 package org.spockframework.mock.runtime;
 
-import org.spockframework.gentyref.GenericTypeReflector;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.spockframework.mock.*;
 import org.spockframework.util.*;
 

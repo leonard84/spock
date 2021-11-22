@@ -16,10 +16,12 @@
 
 package org.spockframework.smoke.mock
 
-import org.spockframework.gentyref.TypeToken
+
 import org.spockframework.mock.IMockInvocation
 import spock.lang.Ignore
 import spock.lang.Specification
+
+import io.leangen.geantyref.TypeToken
 
 class GenericMockInvocations extends Specification {
   interface Function<D, C> {

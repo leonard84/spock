@@ -14,13 +14,14 @@
 
 package org.spockframework.util;
 
+import io.leangen.geantyref.*;
 import org.codehaus.groovy.runtime.MetaClassHelper;
-import org.spockframework.gentyref.GenericTypeReflector;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class ReflectionUtil {
   /**
@@ -243,6 +244,28 @@ public abstract class ReflectionUtil {
       result.add(GenericTypeReflector.erase(type));
     }
     return result;
+  }
+
+  public static Type getResolvedReturnType(Method m, Type declaringType) {
+    return resolveTypeVariableIfNecessary(GenericTypeReflector.getReturnType(m, declaringType));
+  }
+
+  public static Type getResolvedFieldType(Field f, Type declaringType) {
+    return resolveTypeVariableIfNecessary(GenericTypeReflector.getFieldType(f, declaringType));
+  }
+
+  public static List<Type> getResolvedParameterTypes(Method m, Type declaringType) {
+    return Arrays.stream(GenericTypeReflector.getParameterTypes(m, declaringType))
+      .map(ReflectionUtil::resolveTypeVariableIfNecessary)
+      .collect(Collectors.toList());
+  }
+
+  private static Type resolveTypeVariableIfNecessary(Type returnType) {
+    if (returnType instanceof TypeVariable) {
+      AnnotatedType annotatedType = GenericTypeReflector.annotate(returnType);
+      return GenericTypeReflector.reduceBounded(annotatedType).getType();
+    }
+    return returnType;
   }
 
   public static boolean isToStringOverridden(Class<?> valueClass) {

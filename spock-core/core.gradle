@@ -23,6 +23,7 @@ dependencies {
   if (variant == 2.5) {
     api project(':spock-groovy2-compat')
   }
+  api libs.geAnTyRef
 
   implementation libs.junitPlatformTestkit, optional
   implementation libs.jetbrainsAnnotations, optional

@@ -16,6 +16,10 @@ package org.spockframework.util
 
 import spock.lang.*
 
+import java.lang.annotation.Annotation
+
+import io.leangen.geantyref.TypeToken
+
 class ReflectionUtilSpec extends Specification {
   def "get package name"() {
     expect:
@@ -179,6 +183,80 @@ class ReflectionUtilSpec extends Specification {
     clazz << [Object, Base, InvokeMe, Generics]
   }
 
+  def "resolve parameter types"() {
+    def method = Generics.methods.find { it.name == "foo" }
+
+    expect:
+    ReflectionUtil.getResolvedParameterTypes(method, Generics) == [Object, List, List]
+  }
+
+  def "resolve bounded parameter types"() {
+    def method = BoundedGenerics.methods.find { it.name == "foo" }
+
+    expect:
+    ReflectionUtil.getResolvedParameterTypes(method, BoundedGenerics) == [Number, List, List]
+  }
+
+  def "resolve return types"() {
+    def method = Generics.methods.find { it.name == "bar" }
+
+    expect:
+    ReflectionUtil.getResolvedReturnType(method, Generics) == Object
+  }
+
+  def "resolve bounded return types"() {
+    def method = BoundedGenerics.methods.find { it.name == "bar" }
+
+    expect:
+    ReflectionUtil.getResolvedReturnType(method, BoundedGenerics) == Number
+  }
+
+  def "resolve field types"() {
+    def field = Generics.declaredFields.find { it.name == "value" }
+
+    expect:
+    ReflectionUtil.getResolvedFieldType(field, Generics) == Object
+  }
+
+  def "resolve bounded field types"() {
+    def field = BoundedGenerics.declaredFields.find { it.name == "value" }
+
+    expect:
+    ReflectionUtil.getResolvedFieldType(field, BoundedGenerics) == Number
+  }
+
+  def "resolve inherited parameter types"() {
+    def method = Child.methods.find { it.name == "foo" }
+    def integerList = new TypeToken<List<Integer>>() {}.type
+    def stringList = new TypeToken<List<String>>() {}.type
+
+    expect:
+    ReflectionUtil.getResolvedParameterTypes(method, Child) == [Integer, integerList, stringList]
+  }
+
+  def "resolve inherited return types"() {
+    def method = Child.methods.find { it.name == "bar" }
+
+    expect:
+    ReflectionUtil.getResolvedReturnType(method, Child) == Integer
+  }
+
+  def "resolve inherited field types"() {
+    def field = BoundedGenerics.declaredFields.find { it.name == "value" }
+
+    expect:
+    ReflectionUtil.getResolvedFieldType(field, Child) == Integer
+  }
+
+
+  def "resolve bounded local return type"() {
+    def method = Child.methods.find { it.name == "getAnnotation" }
+
+    expect:
+    ReflectionUtil.getResolvedReturnType(method, Child) == Annotation
+  }
+
+
   static class Base {
     def baseMethod(String arg1, int arg2) {}
   }
@@ -198,6 +276,22 @@ class ReflectionUtilSpec extends Specification {
   }
 
   static class Generics<T> {
+    T value
     void foo(T one, List<T> two, List<String> three) {}
+    T bar(){ null }
+  }
+
+  static class BoundedGenerics<T extends Number> {
+    T value
+    void foo(T one, List<T> two, List<String> three) {}
+    T bar(){ null }
+
+    public <A extends Annotation> A getAnnotation(Class<A> clazz) {
+      return null
+    }
+  }
+
+
+  static class Child extends BoundedGenerics<Integer> {
   }
 }

@@ -14,7 +14,7 @@
 
 package org.spockframework.mock.runtime;
 
-import org.spockframework.gentyref.GenericTypeReflector;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.spockframework.mock.IMockMethod;
 import org.spockframework.util.ReflectionUtil;
 
@@ -42,7 +42,7 @@ public class StaticMockMethod implements IMockMethod {
 
   @Override
   public List<Type> getExactParameterTypes() {
-    return Arrays.asList(GenericTypeReflector.getExactParameterTypes(method, mockType));
+    return ReflectionUtil.getResolvedParameterTypes(method, mockType);
   }
 
   @Override
@@ -52,7 +52,7 @@ public class StaticMockMethod implements IMockMethod {
 
   @Override
   public Type getExactReturnType() {
-    return GenericTypeReflector.getExactReturnType(method, mockType);
+    return ReflectionUtil.getResolvedReturnType(method, mockType);
   }
 
   @Override

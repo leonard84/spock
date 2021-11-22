@@ -17,7 +17,7 @@ package org.spockframework.builder;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import org.spockframework.gentyref.GenericTypeReflector;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.spockframework.runtime.GroovyRuntimeUtil;
 import org.spockframework.util.CollectionUtil;
 
