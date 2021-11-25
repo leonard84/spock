@@ -16,13 +16,15 @@
 
 package org.spockframework.guice;
 
-import org.spockframework.mock.MockUtil;
+import org.spockframework.mock.*;
 import org.spockframework.runtime.extension.*;
-import org.spockframework.runtime.model.SpecInfo;
+import org.spockframework.runtime.model.*;
+import spock.guice.GuiceSpyInterceptor;
 import spock.lang.*;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.google.inject.*;
 import com.google.inject.spi.InjectionPoint;
@@ -38,12 +40,14 @@ public class GuiceInterceptor extends AbstractMethodInterceptor {
   private static final MockUtil MOCK_UTIL = new MockUtil();
   private final Set<Class<? extends Module>> moduleClasses;
   private final Set<InjectionPoint> injectionPoints;
+  private final Set<FieldInfo> spyFields;
 
   private Injector injector;
 
   public GuiceInterceptor(SpecInfo spec, Set<Class<? extends Module>> moduleClasses) {
     this.moduleClasses = moduleClasses;
     injectionPoints = InjectionPoint.forInstanceMethodsAndFields(spec.getReflection());
+    spyFields = spec.getAllFields().stream().filter(field -> field.isAnnotationPresent(GuiceSpyInterceptor.class)).collect(Collectors.toSet());
   }
 
   @Override
@@ -63,6 +67,7 @@ public class GuiceInterceptor extends AbstractMethodInterceptor {
     injector = Guice.createInjector(createModules());
   }
 
+  @SuppressWarnings("rawtypes")
   private List<Module> createModules() {
     List<Module> modules = new ArrayList<>();
     for (Class<? extends Module> clazz : moduleClasses) {
@@ -71,6 +76,10 @@ public class GuiceInterceptor extends AbstractMethodInterceptor {
       } catch (InstantiationException | IllegalAccessException e) {
         throw new GuiceExtensionException("Failed to instantiate module '%s'", e).withArgs(clazz.getSimpleName());
       }
+    }
+    if (!spyFields.isEmpty()) {
+      Map<String, Class> classes = spyFields.stream().collect(Collectors.toMap(FieldInfo::getName, FieldInfo::getType));
+      modules.add(new SpyInterceptorModule(classes));
     }
     return modules;
   }
@@ -89,6 +98,39 @@ public class GuiceInterceptor extends AbstractMethodInterceptor {
       }
       field.setAccessible(true);
       field.set(target, value);
+    }
+
+    MockHolder mockHolder = new MockHolder();
+    injector.injectMembers(mockHolder);
+    if (mockHolder.hasMocks()) {
+      mockHolder.attachAll(specInstance);
+      for (FieldInfo field : spyFields) {
+        field.writeValue(target, mockHolder.getMockFor(field.getType()));
+      }
+    } else {
+      if (!spyFields.isEmpty()) {
+        throw new GuiceExtensionException("No mock objects available for injection");
+      }
+    }
+  }
+
+  private static class MockHolder {
+    @Inject
+    public Set<ISpockMockObject> mockObjects;
+
+    boolean hasMocks() {
+      return mockObjects != null && !mockObjects.isEmpty();
+    }
+
+    void attachAll(Specification spec) {
+      mockObjects.forEach(mock -> MOCK_UTIL.attachMock(mock, spec));
+    }
+
+    Object getMockFor(Class<?> clazz) {
+      return mockObjects.stream()
+        .filter(clazz::isInstance)
+        .findFirst()
+        .orElseThrow(() -> new GuiceExtensionException("No mock found for class " + clazz.getName()));
     }
   }
 }

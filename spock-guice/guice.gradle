@@ -6,7 +6,7 @@ description = "Spock's Guice Module provides support for testing Guice 2/3 based
 
 dependencies {
   api project(":spock-core")
-  implementation "com.google.inject:guice:3.0", provided
+  implementation "com.google.inject:guice:4.2.2", provided
 }
 
 jar {
