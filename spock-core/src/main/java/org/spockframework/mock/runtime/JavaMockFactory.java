@@ -53,6 +53,7 @@ public class JavaMockFactory implements IMockFactory {
           " because Java mocks cannot mock globally. If the code under test is written in Groovy, use a Groovy mock.");
     }
 
+    // TODO find way to handle additionalInterfaces for metaClass
     MetaClass mockMetaClass = GroovyRuntimeUtil.getMetaClass(configuration.getType());
     IProxyBasedMockInterceptor interceptor = new JavaMockInterceptor(configuration, specification, mockMetaClass);
     Object proxy = ProxyBasedMockFactory.INSTANCE.create(configuration.getType(), configuration.getAdditionalInterfaces(),

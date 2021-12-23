@@ -76,7 +76,7 @@ public class JavaMockInterceptor extends BaseMockInterceptor {
       }
     }
 
-    IMockMethod mockMethod = new StaticMockMethod(method, mockConfiguration.getExactType());
+    IMockMethod mockMethod = new StaticMockMethod(method, mockConfiguration.getExactType(), mockConfiguration.getAdditionalInterfaces());
     IMockInvocation invocation = new MockInvocation(mockObject, mockMethod, Arrays.asList(args), realMethodInvoker);
     IMockController mockController = specification == null ? getFallbackMockController() :
       specification.getSpecificationContext().getMockController();

@@ -24,10 +24,12 @@ import java.util.*;
 public class StaticMockMethod implements IMockMethod {
   private final Method method;
   private final Type mockType;
+  private final List<Class<?>> additionalInterfaces;
 
-  public StaticMockMethod(Method method, Type mockType) {
+  public StaticMockMethod(Method method, Type mockType, List<Class<?>> additionalInterfaces) {
     this.method = method;
     this.mockType = mockType;
+    this.additionalInterfaces = additionalInterfaces;
   }
 
   @Override
@@ -52,7 +54,19 @@ public class StaticMockMethod implements IMockMethod {
 
   @Override
   public Type getExactReturnType() {
-    return ReflectionUtil.getResolvedReturnType(method, mockType);
+    try {
+
+      return ReflectionUtil.getResolvedReturnType(method, mockType);
+    } catch (IllegalArgumentException e) {
+      for (Class<?> additionalInterface : additionalInterfaces) {
+        try {
+          return ReflectionUtil.getResolvedReturnType(method, additionalInterface);
+        } catch (IllegalArgumentException e1) {
+          e.addSuppressed(e1);
+        }
+      }
+      throw e;
+    }
   }
 
   @Override

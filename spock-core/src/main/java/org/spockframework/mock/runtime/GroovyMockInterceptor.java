@@ -72,7 +72,7 @@ public class GroovyMockInterceptor extends BaseMockInterceptor {
       throw new MissingPropertyException((String)args[0], mockConfiguration.getType());
     }
 
-    IMockMethod mockMethod = new StaticMockMethod(method, mockConfiguration.getExactType());
+    IMockMethod mockMethod = new StaticMockMethod(method, mockConfiguration.getExactType(), mockConfiguration.getAdditionalInterfaces());
     IMockInvocation invocation = new MockInvocation(mockObject, mockMethod, Arrays.asList(args), realMethodInvoker);
     IMockController controller = specification.getSpecificationContext().getMockController();
 
