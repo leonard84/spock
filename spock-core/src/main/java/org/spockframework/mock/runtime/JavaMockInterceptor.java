@@ -27,7 +27,7 @@ public class JavaMockInterceptor extends BaseMockInterceptor {
   private final IMockConfiguration mockConfiguration;
   private Specification specification;
   private MockController fallbackMockController;
-  private final MetaClass mockMetaClass;
+  private MetaClass mockMetaClass;
 
   public JavaMockInterceptor(IMockConfiguration mockConfiguration, Specification specification, MetaClass mockMetaClass) {
     this.mockConfiguration = mockConfiguration;
@@ -82,6 +82,10 @@ public class JavaMockInterceptor extends BaseMockInterceptor {
       specification.getSpecificationContext().getMockController();
 
     return mockController.handle(invocation);
+  }
+
+  void setMockMetaClass(MetaClass mockMetaClass) {
+    this.mockMetaClass = mockMetaClass;
   }
 
   @Override

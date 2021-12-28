@@ -14,15 +14,19 @@
 
 package org.spockframework.mock.runtime;
 
+import groovy.lang.DelegatingMetaClass;
+import groovy.lang.GroovyObject;
+import groovy.lang.MetaClass;
+import groovy.lang.MetaMethod;
 import org.spockframework.mock.*;
 import org.spockframework.runtime.GroovyRuntimeUtil;
 import org.spockframework.util.ReflectionUtil;
 import spock.lang.Specification;
 
-import java.lang.reflect.*;
-import java.util.*;
-
-import groovy.lang.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.List;
 
 public class GroovyMockMetaClass extends DelegatingMetaClass implements SpecificationAttachable {
   private final IMockConfiguration configuration;
@@ -78,7 +82,10 @@ public class GroovyMockMetaClass extends DelegatingMetaClass implements Specific
     // we evaluated the cast information from wrappers in getTypes above, now we need the pure arguments
     Object[] unwrappedArgs = GroovyRuntimeUtil.asUnwrappedArgumentArray(args);
 
-    if (method != null && method.getDeclaringClass().isAssignableFrom(configuration.getType())) {
+    if (method != null && (
+      method.getDeclaringClass().isAssignableFrom(configuration.getType())
+      || configuration.getAdditionalInterfaces().stream().anyMatch(i -> method.getDeclaringClass().isAssignableFrom(i))
+    )) {
       if (!isStatic && !ReflectionUtil.isFinalMethod(method) && !configuration.isGlobal()) {
         // perform coercion of arguments, e.g. GString to String
         Object[] coercedArgs = metaMethod.coerceArgumentsToClasses(unwrappedArgs);
@@ -119,7 +126,7 @@ public class GroovyMockMetaClass extends DelegatingMetaClass implements Specific
         configuration.isVerified(), configuration.isGlobal(), configuration.getDefaultResponse(), specification, this);
     IMockMethod mockMethod;
     if (metaMethod != null) {
-      List<Type> parameterTypes = Arrays.<Type>asList(metaMethod.getNativeParameterTypes());
+      List<Type> parameterTypes = Arrays.asList(metaMethod.getNativeParameterTypes());
       mockMethod = new DynamicMockMethod(methodName, parameterTypes, metaMethod.getReturnType(), isStatic);
     } else {
       mockMethod = new DynamicMockMethod(methodName, arguments.length, isStatic);

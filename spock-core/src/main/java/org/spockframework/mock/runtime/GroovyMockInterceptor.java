@@ -26,7 +26,7 @@ import groovy.lang.*;
 public class GroovyMockInterceptor extends BaseMockInterceptor {
   private final IMockConfiguration mockConfiguration;
   private final Specification specification;
-  private final MetaClass mockMetaClass;
+  private MetaClass mockMetaClass;
 
   public GroovyMockInterceptor(IMockConfiguration mockConfiguration, Specification specification, MetaClass mockMetaClass) {
     this.mockConfiguration = mockConfiguration;
@@ -77,6 +77,10 @@ public class GroovyMockInterceptor extends BaseMockInterceptor {
     IMockController controller = specification.getSpecificationContext().getMockController();
 
     return controller.handle(invocation);
+  }
+
+  void setMockMetaClass(MetaClass mockMetaClass) {
+    this.mockMetaClass = mockMetaClass;
   }
 
   @Override

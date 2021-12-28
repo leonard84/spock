@@ -18,8 +18,10 @@ import io.leangen.geantyref.GenericTypeReflector;
 import org.spockframework.mock.IMockMethod;
 import org.spockframework.util.ReflectionUtil;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.List;
 
 public class StaticMockMethod implements IMockMethod {
   private final Method method;
@@ -44,7 +46,18 @@ public class StaticMockMethod implements IMockMethod {
 
   @Override
   public List<Type> getExactParameterTypes() {
-    return ReflectionUtil.getResolvedParameterTypes(method, mockType);
+    try {
+      return ReflectionUtil.getResolvedParameterTypes(method, mockType);
+    } catch (IllegalArgumentException e) {
+      for (Class<?> additionalInterface : additionalInterfaces) {
+        try {
+          return ReflectionUtil.getResolvedParameterTypes(method, additionalInterface);
+        } catch (IllegalArgumentException e1) {
+          e.addSuppressed(e1);
+        }
+      }
+      throw e;
+    }
   }
 
   @Override
@@ -55,7 +68,6 @@ public class StaticMockMethod implements IMockMethod {
   @Override
   public Type getExactReturnType() {
     try {
-
       return ReflectionUtil.getResolvedReturnType(method, mockType);
     } catch (IllegalArgumentException e) {
       for (Class<?> additionalInterface : additionalInterfaces) {
@@ -72,5 +84,14 @@ public class StaticMockMethod implements IMockMethod {
   @Override
   public boolean isStatic() {
     return Modifier.isStatic(method.getModifiers());
+  }
+
+  @Override
+  public String toString() {
+    return "StaticMockMethod{" +
+      "mockType=" + mockType +
+      ", method=" + method +
+      ", additionalInterfaces=" + additionalInterfaces +
+      '}';
   }
 }
