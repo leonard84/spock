@@ -4,9 +4,22 @@ ext.displayName = "Spock Framework - Guice Module"
 
 description = "Spock's Guice Module provides support for testing Guice 2/3 based applications."
 
+configurations {
+  guice5RuntimeOnly {
+    canBeConsumed = false
+    extendsFrom testRuntimeClasspath
+  }
+}
+
 dependencies {
   api project(":spock-core")
   implementation "com.google.inject:guice:4.2.2", provided
+
+  guice5RuntimeOnly("com.google.inject:guice") {
+    version {
+      strictly('5.0.1')
+    }
+  }
 }
 
 jar {
@@ -23,3 +36,11 @@ jar {
     )
   }
 }
+
+task testGuice5(type: Test) {
+  mustRunAfter test
+  classpath = configurations.guice5RuntimeOnly + sourceSets.test.output + sourceSets.main.output
+
+}
+
+check.dependsOn testGuice5
