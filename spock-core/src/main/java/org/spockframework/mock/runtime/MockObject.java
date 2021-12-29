@@ -93,7 +93,7 @@ public class MockObject implements IMockObject {
     return match;
   }
 
-  private boolean matchGlobal(Object target) {
+  protected boolean matchGlobal(Object target) {
     return (instance.getClass() == target.getClass()) && (!isMockOfClass() || (instance == target));
   }
 

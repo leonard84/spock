@@ -1,5 +1,6 @@
 package org.spockframework.mock.runtime;
 
+import org.spockframework.mock.IMockObject;
 import org.spockframework.runtime.GroovyRuntimeUtil;
 
 import java.lang.reflect.Method;

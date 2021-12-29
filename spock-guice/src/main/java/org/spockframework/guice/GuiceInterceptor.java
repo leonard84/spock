@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.inject.Module;
 import com.google.inject.*;
 import com.google.inject.spi.InjectionPoint;
 
@@ -115,7 +116,7 @@ public class GuiceInterceptor extends AbstractMethodInterceptor {
   }
 
   private static class MockHolder {
-    @Inject
+    @Inject(optional = true)
     public Set<ISpockMockObject> mockObjects;
 
     boolean hasMocks() {
