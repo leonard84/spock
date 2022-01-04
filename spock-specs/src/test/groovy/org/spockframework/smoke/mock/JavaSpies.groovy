@@ -223,6 +223,28 @@ class JavaSpies extends Specification {
     thrown(SpockException)
   }
 
+  @Issue("https://github.com/spockframework/spock/issues/1406")
+  def "spy on an interface with a default method"() {
+    given:
+    def interfaceWithDefaultMethod = Spy(InterfaceWithDefaultMethod)
+    def app = new InterfaceUser(interfaceWithDefaultMethod: interfaceWithDefaultMethod)
+
+    when:
+    def result = app.doSomething()
+
+    then:
+    _ * interfaceWithDefaultMethod.normalMethod() >> "bar"
+    result == "bar"
+  }
+
+  static class InterfaceUser {
+    InterfaceWithDefaultMethod interfaceWithDefaultMethod
+
+    String doSomething() {
+      interfaceWithDefaultMethod.defaultMethod()
+    }
+  }
+
   static class Constructable {
     int arg1
     int arg2
@@ -301,4 +323,3 @@ class JavaSpies extends Specification {
     }
   }
 }
-
