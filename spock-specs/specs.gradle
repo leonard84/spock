@@ -44,7 +44,7 @@ test {
   testLogging.events 'standard_error'
   maxParallelForks = 1
 
-  if (isCiServer) {
+//  if (isCiServer) {
     retry {
       maxRetries = 2
       maxFailures = 20
@@ -54,7 +54,7 @@ test {
         includeAnnotationClasses.add("spock.lang.Isolated")
       }
     }
-  }
+//  }
 }
 
 task groovyConsole(type: JavaExec) {

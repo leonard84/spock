@@ -37,6 +37,10 @@ class TimeoutExtension extends EmbeddedSpecification {
     runner.addClassMemberImport TimeUnit
   }
 
+  def "fail"() {
+    expect: false
+  }
+
   @Timeout(1)
   def "method that completes in time"() {
     setup: Thread.sleep 500
