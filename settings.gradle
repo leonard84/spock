@@ -41,7 +41,7 @@ gradleEnterprise {
     uploadInBackground = !isCiServer
 
 
-    if (gradle.startParameter.buildScan || (isCiServer && accessKeysAreMissing())) {
+    if (gradle.startParameter.buildScan) {
       termsOfServiceUrl = "https://gradle.com/terms-of-service"
     } else {
       server = gradleEnterpriseServer
@@ -49,9 +49,9 @@ gradleEnterprise {
       (delegate as BuildScanExtensionWithHiddenFeatures).publishIfAuthenticated()
     }
 
-    if (isCiServer) {
-      publishAlways()
-      termsOfServiceAgree = "yes"
+    if (isCiServer && !accessKeysAreMissing()) {
+        publishAlways()
+        termsOfServiceAgree = "yes"
     }
 
     obfuscation {
