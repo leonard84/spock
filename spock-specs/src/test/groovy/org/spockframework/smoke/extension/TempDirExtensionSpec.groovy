@@ -176,3 +176,23 @@ class ParallelTempDirSpec extends Specification {
     n << [1, 2, 3]
   }
 }
+
+class TempDirFieldInitSpec extends Specification {
+  @Shared
+  @TempDir
+  Path sharedTempDir
+
+  @Shared
+  Path sharedOther = sharedTempDir.resolve('other')
+
+  @TempDir
+  Path tempDir
+
+  Path other = tempDir.resolve('other')
+
+  def "check that tempDir uses field initializer"() {
+    expect:
+    other
+    sharedOther
+  }
+}
