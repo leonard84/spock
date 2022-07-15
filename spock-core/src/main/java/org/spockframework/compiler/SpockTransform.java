@@ -85,5 +85,11 @@ public class SpockTransform implements ASTTransformation {
             e, clazz.getName());
       }
     }
+    AstNodeCache getAstNodeCache() {
+      return nodeCache;
+    }
+  }
+  AstNodeCache getAstNodeCache() {
+    return new Impl().getAstNodeCache();
   }
 }
