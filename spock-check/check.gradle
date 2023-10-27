@@ -1,0 +1,5 @@
+
+dependencies {
+  api projects.spockCore
+  api "net.jqwik:jqwik:1.8.1"
+}
