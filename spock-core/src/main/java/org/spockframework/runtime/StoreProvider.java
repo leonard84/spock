@@ -17,6 +17,7 @@ package org.spockframework.runtime;
 
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.spockframework.runtime.extension.IStore;
+import org.spockframework.runtime.extension.IStoreProvider;
 import org.spockframework.util.Nullable;
 
 import java.util.Objects;
@@ -25,7 +26,7 @@ import java.util.Objects;
  * @author Leonard Brünings
  * @since 2.4
  */
-public class StoreProvider implements AutoCloseable {
+public class StoreProvider implements IStoreProvider, AutoCloseable {
   private static final NamespacedHierarchicalStore.CloseAction<IStore.Namespace> CLOSE_ACTION = (IStore.Namespace namespace, Object key, Object value) -> {
     if (value instanceof AutoCloseable) {
       ((AutoCloseable) value).close();
@@ -49,6 +50,7 @@ public class StoreProvider implements AutoCloseable {
     return new StoreProvider(newBackendStore(backend), this);
   }
 
+  @Override
   public NamespacedExtensionStore getStore(IStore.Namespace namespace) {
     return new NamespacedExtensionStore(backend,
       () -> parent == null ? null : parent.getStore(namespace),

@@ -88,6 +88,7 @@ public class PlatformSpecRunner {
       context = context.withSharedInstance(instance);
     }
     getSpecificationContext(context).setSharedInstance(context.getSharedInstance());
+    getSpecificationContext(context).setStoreProvider(context.getStoreProvider());
     return context;
   }
 
@@ -187,7 +188,11 @@ public class PlatformSpecRunner {
     if (currentFeature.isSkipped()) {
       throw new InternalSpockError("Invalid state, feature is executed although it should have been skipped");
     }
+
+    IStoreProvider oldStoreProvider = getSpecificationContext(context).getStoreProvider();
     getSpecificationContext(context).setCurrentFeature(currentFeature);
+    getSpecificationContext(context).setStoreProvider(context.getStoreProvider());
+
 
     supervisor.beforeFeature(currentFeature);
     invoke(context, this, createMethodInfoForDoRunFeature(context, feature));
@@ -195,6 +200,7 @@ public class PlatformSpecRunner {
 
     runCloseContextStoreProvider(context, MethodKind.CLEANUP);
     getSpecificationContext(context).setCurrentFeature(null);
+    getSpecificationContext(context).setStoreProvider(oldStoreProvider);
   }
 
   private MethodInfo createMethodInfoForDoRunFeature(SpockExecutionContext context, Runnable feature) {
@@ -215,8 +221,11 @@ public class PlatformSpecRunner {
   void runIteration(SpockExecutionContext context, IterationInfo iterationInfo, Runnable runnable) {
     if (context.getErrorInfoCollector().hasErrors()) return;
 
+    IStoreProvider oldStoreProvider = getSpecificationContext(context).getStoreProvider();
     context = context.withCurrentIteration(iterationInfo);
     getSpecificationContext(context).setCurrentIteration(iterationInfo);
+    getSpecificationContext(context).setStoreProvider(context.getStoreProvider());
+
 
     supervisor.beforeIteration(iterationInfo);
     invoke(context, this, createMethodInfoForDoRunIteration(context, runnable));
@@ -224,6 +233,7 @@ public class PlatformSpecRunner {
     runCloseContextStoreProvider(context, MethodKind.CLEANUP);
 
     getSpecificationContext(context).setCurrentIteration(null); // TODO check if we really need to null here
+    getSpecificationContext(context).setStoreProvider(oldStoreProvider);
   }
 
   IterationInfo createIterationInfo(SpockExecutionContext context, int iterationIndex, Object[] args, int estimatedNumIterations) {

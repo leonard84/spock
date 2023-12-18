@@ -17,6 +17,7 @@ package org.spockframework.runtime
 
 import org.spockframework.EmbeddedSpecification
 import org.spockframework.runtime.extension.*
+import org.spockframework.runtime.model.FieldInfo
 import org.spockframework.runtime.model.MethodKind
 import org.spockframework.runtime.model.SpecInfo
 import org.spockframework.specs.extension.Snapshot
@@ -48,19 +49,52 @@ class StoreSpec extends EmbeddedSpecification {
         actionRecorderList sharedList
       }
     }
+    runner.addClassImport(IStore)
+    runner.addClassImport(LoggingStoreConfig)
+    runner.addClassImport(LoggingValue)
 
     when:
     runner.runWithImports('''
-    @LogStoreUsage
     class ASpec extends Specification {
+      static final def NS = IStore.Namespace.create(ASpec)
+      @Shared
+      @LogStoreUsage
+      List<String> actionList
+
+      def setupSpec() {
+        storeValue("setupSpec")
+      }
+
+      def cleanupSpec() {
+        storeValue("cleanupSpec")
+      }
+
+      def setup() {
+        storeValue("setup: #${specificationContext.currentIteration.iterationIndex}")
+      }
+
+      def cleanup() {
+        storeValue("cleanup: #${specificationContext.currentIteration.iterationIndex}")
+      }
+
+
       def "a feature"() {
+        given:
+        storeValue("a feature")
         expect: true
       }
 
       def "data driven feature"() {
+        given:
+        storeValue("data driven feature: #${specificationContext.currentIteration.iterationIndex}")
         expect: true
         where:
         i << [1, 2]
+      }
+
+      void storeValue(String value) {
+        actionList << "@@ Storing: $value"
+        specificationContext.getStore(NS).put(value, new LoggingValue(actionList, "@@ $value"))
       }
     }
 ''')
@@ -119,16 +153,16 @@ class LogStoreExtension implements IAnnotationDrivenExtension<LogStoreUsage> {
   }
 
   @Override
-  void visitSpecAnnotation(LogStoreUsage annotation, SpecInfo spec) {
-    def specInfo = spec.bottomSpec
+  void visitFieldAnnotation(LogStoreUsage annotation, FieldInfo field) {
+
+    def specInfo = field.parent.bottomSpec
     def interceptor = new LoggingStoreInterceptor(config.actionRecorderList.get())
+    specInfo.addSharedInitializerInterceptor {field.writeValue(it.instance, config.actionRecorderList.get()); it.proceed() }
     specInfo.addSharedInitializerInterceptor interceptor
-    specInfo.allSharedInitializerMethods*.addInterceptor interceptor
     specInfo.addInterceptor interceptor
     specInfo.addSetupSpecInterceptor interceptor
     specInfo.addInitializerInterceptor interceptor
     specInfo.addSetupInterceptor interceptor
-    specInfo.allFixtureMethods*.addInterceptor interceptor
     specInfo.allFeatures*.addInterceptor interceptor
     specInfo.allFeatures*.addIterationInterceptor interceptor
     specInfo.allFeatures*.featureMethod*.addInterceptor interceptor
