@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2024 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,13 +15,19 @@
 
 package org.spockframework.runtime;
 
-import org.spockframework.runtime.extension.*;
-import org.spockframework.runtime.model.*;
+import org.spockframework.runtime.extension.IDataDriver;
+import org.spockframework.runtime.extension.IIterationRunner;
+import org.spockframework.runtime.model.ExecutionResult;
+import org.spockframework.runtime.model.FeatureInfo;
+import org.spockframework.runtime.model.IterationInfo;
+import org.spockframework.runtime.model.MethodKind;
 import org.spockframework.util.ExceptionUtil;
 import spock.config.RunnerConfiguration;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Adds the ability to run parameterized features.
@@ -62,6 +68,19 @@ public class PlatformParameterizedSpecRunner extends PlatformSpecRunner {
 
       @Override
       public CompletableFuture<ExecutionResult> runIteration(Object[] args, int estimatedNumIterations) {
+        Function<IterationNode, CompletableFuture<ExecutionResult>> iThrowableFunction = childExecutor::execute;
+        return execute(args, estimatedNumIterations, __ -> {
+        });
+      }
+
+      @Override
+      public CompletableFuture<ExecutionResult> skipIteration(Object[] args, int estimatedNumIterations, String skipReason) {
+        return execute(args, estimatedNumIterations, iterationNode -> {
+          iterationNode.getIterationInfo().skip(skipReason);
+        });
+      }
+
+      private CompletableFuture<ExecutionResult> execute(Object[] args, int estimatedNumIterations, Consumer<IterationNode> iterationNodeConfigurer) {
         int currIterationIndex = iterationIndex.getAndIncrement();
         IterationInfo iterationInfo = createIterationInfo(context, currIterationIndex, args, estimatedNumIterations);
         IterationNode iterationNode = new IterationNode(
@@ -71,11 +90,14 @@ public class PlatformParameterizedSpecRunner extends PlatformSpecRunner {
         if (context.getErrorInfoCollector().hasErrors()) {
           return CompletableFuture.completedFuture(ExecutionResult.REJECTED);
         }
-        if (iterationInfo.getFeature().getIterationFilter().isAllowed(iterationInfo.getIterationIndex())) {
-          return childExecutor.execute(iterationNode);
+        if (!iterationInfo.getFeature().getIterationFilter().isAllowed(iterationInfo.getIterationIndex())) {
+          iterationNode.getIterationInfo().skip("Filtered by IterationSelector");
         }
-        return CompletableFuture.completedFuture(ExecutionResult.SKIPPED);
+        iterationNodeConfigurer.accept(iterationNode);
+        return childExecutor.execute(iterationNode);
       }
     };
+
+
   }
 }
