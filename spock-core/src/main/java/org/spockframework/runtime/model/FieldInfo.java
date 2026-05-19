@@ -59,10 +59,10 @@ public class FieldInfo extends NodeInfo<SpecInfo, Field> {
   }
 
   public Object readValue(Object target) {
-    return GroovyRuntimeUtil.getProperty(target, getReflection().getName());
+    return GroovyRuntimeUtil.getProperty(target, getName());
   }
 
   public void writeValue(Object target, Object value) {
-    GroovyRuntimeUtil.setProperty(target, getReflection().getName(), value);
+    GroovyRuntimeUtil.setProperty(target, getName(), value);
   }
 }
