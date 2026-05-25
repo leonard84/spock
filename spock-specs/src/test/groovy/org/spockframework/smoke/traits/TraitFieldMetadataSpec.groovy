@@ -289,6 +289,38 @@ class TraitFieldMetadataSpec extends EmbeddedSpecification {
     instance.x == 0
   }
 
+  def "static trait fields are not surfaced as FieldInfo and their static init is not moved"() {
+    // Spock's SpecParser ignores static spec-declared fields (they have no
+    // per-instance semantics). Static trait fields should follow the same
+    // rule, and their $static$init$ call (in the class's <clinit>) must NOT
+    // be moved to $spock_initializeFields.
+    given:
+    def specClass = compiler.compile('''
+      trait T {
+        static int staticCounter = 99
+        int instanceCounter = 7
+      }
+      class StaticTraitFieldSpec extends spock.lang.Specification implements T {
+        def feature() { expect: instanceCounter == 7 && staticCounter == 99 }
+      }
+    ''').first()
+
+    def specInfo = new SpecInfoBuilder(specClass).build()
+
+    expect: "the instance trait field is in the SpecInfo, the static is not"
+    specInfo.fields*.name.contains('instanceCounter')
+    !specInfo.fields*.name.contains('staticCounter')
+
+    when: "we read the static field directly without creating any instance"
+    def staticField = specClass.declaredFields.find { it.name.endsWith('__staticCounter') }
+    staticField.setAccessible(true)
+
+    then:
+    staticField != null
+    Modifier.isStatic(staticField.modifiers)
+    staticField.get(null) == 99
+  }
+
   def "multi-trait initializer ordering follows the order Groovy injected into the constructor"() {
     // We don't assert a specific cross-trait order — it's whatever Groovy
     // chose. We assert that BOTH initializers run exactly once per

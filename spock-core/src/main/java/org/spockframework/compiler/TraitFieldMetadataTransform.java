@@ -114,6 +114,11 @@ public class TraitFieldMetadataTransform implements ASTTransformation {
       for (ClassNode trait : traits) {
         String prefix = trait.getName().replace('.', '_') + "__";
         for (FieldNode composed : spec.getFields()) {
+          // SpecParser explicitly skips static fields (no per-instance
+          // semantics, no @FieldMetadata, not in SpecInfo.fields). Match
+          // that behavior for trait-composed fields. Their $static$init$
+          // already runs at class-load time via the JVM <clinit>.
+          if (composed.isStatic()) continue;
           String composedName = composed.getName();
           if (!composedName.startsWith(prefix)) continue;
           String originalName = composedName.substring(prefix.length());
