@@ -112,6 +112,11 @@ class TraitFieldMetadataSpec extends EmbeddedSpecification {
     FieldInfo counterField = specInfo.fields.find { it.name == 'counter' }
 
     def instance = specClass.getDeclaredConstructor().newInstance()
+    // Trait field initializers run in $spock_initializeFields, not in the
+    // constructor, so we invoke it to observe the trait's initial value.
+    def initMethod = specClass.getDeclaredMethod('$spock_initializeFields')
+    initMethod.accessible = true
+    initMethod.invoke(instance)
     def initial = counterField.readValue(instance)
     counterField.writeValue(instance, 42)
     def updated = counterField.readValue(instance)
@@ -198,5 +203,128 @@ class TraitFieldMetadataSpec extends EmbeddedSpecification {
 
     then:
     traitFieldOrdinal > specFieldOrdinal
+  }
+
+  def "hasInitializer is true when trait field has an explicit initializer"() {
+    when:
+    def specClass = compiler.compile('''
+      trait T { int x = 42 }
+      class WithInitTraitSpec extends spock.lang.Specification implements T {
+        def feature() { expect: x == 42 }
+      }
+    ''').first()
+
+    def specInfo = new SpecInfoBuilder(specClass).build()
+    FieldInfo field = specInfo.fields.find { it.name == 'x' }
+
+    then:
+    field.hasInitializer()
+  }
+
+  def "hasInitializer is false when trait field has no explicit initializer"() {
+    when:
+    def specClass = compiler.compile('''
+      trait T { int x }
+      class NoInitTraitSpec extends spock.lang.Specification implements T {
+        def feature() { expect: x == 0 }
+      }
+    ''').first()
+
+    def specInfo = new SpecInfoBuilder(specClass).build()
+    FieldInfo field = specInfo.fields.find { it.name == 'x' }
+
+    then:
+    !field.hasInitializer()
+  }
+
+  def "trait field initializer is moved out of the constructor"() {
+    // After the move, constructing a spec leaves trait fields at the JVM
+    // default. The initializer expression now lives in
+    // $spock_initializeFields, mirroring how Spock handles spec-declared
+    // field initializers.
+    given:
+    def specClass = compiler.compile('''
+      trait T { int x = 42 }
+      class CtorMoveTraitSpec extends spock.lang.Specification implements T {
+        def feature() { expect: x == 42 }
+      }
+    ''').first()
+
+    when: "constructing the spec without running Spock's initializer"
+    def instance = specClass.getDeclaredConstructor().newInstance()
+
+    then: "the trait field is at the JVM default, NOT the initializer value"
+    instance.x == 0
+
+    when: "Spock's initializer method runs"
+    def initMethod = specClass.getDeclaredMethod('$spock_initializeFields')
+    initMethod.accessible = true
+    initMethod.invoke(instance)
+
+    then: "the trait field now has the initializer value"
+    instance.x == 42
+  }
+
+  def "trait field without an explicit initializer is not touched by the Spock initializer"() {
+    given:
+    def specClass = compiler.compile('''
+      trait T { int x }
+      class NoInitTraitInitSpec extends spock.lang.Specification implements T {
+        def feature() { expect: x == 0 }
+      }
+    ''').first()
+
+    when:
+    def instance = specClass.getDeclaredConstructor().newInstance()
+
+    then:
+    instance.x == 0
+
+    when:
+    def initMethod = specClass.getDeclaredMethod('$spock_initializeFields')
+    initMethod.accessible = true
+    initMethod.invoke(instance)
+
+    then: "no surprise reset; the field is still at the JVM default"
+    instance.x == 0
+  }
+
+  def "multi-trait initializer ordering follows the order Groovy injected into the constructor"() {
+    // We don't assert a specific cross-trait order — it's whatever Groovy
+    // chose. We assert that BOTH initializers run exactly once per
+    // $spock_initializeFields invocation, and the relative order is stable.
+    given:
+    def specClass = compiler.compile('''
+      package org.spockframework.smoke.traits
+      trait A {
+        String aField = { ResourceHolder.log << 'A'; 'a' }()
+      }
+      trait B {
+        String bField = { ResourceHolder.log << 'B'; 'b' }()
+      }
+      class MultiTraitOrderingSpec extends spock.lang.Specification implements A, B {
+        def feature() { expect: true }
+      }
+    ''').first()
+
+    ResourceHolder.log.clear()
+    def instance = specClass.getDeclaredConstructor().newInstance()
+
+    when: "the constructor must not run any trait initializer"
+    def afterCtor = new ArrayList<>(ResourceHolder.log)
+
+    then:
+    afterCtor.isEmpty()
+
+    when: "the Spock initializer runs"
+    def initMethod = specClass.getDeclaredMethod('$spock_initializeFields')
+    initMethod.accessible = true
+    initMethod.invoke(instance)
+
+    then: "both trait initializers ran exactly once, in a stable order"
+    ResourceHolder.log.size() == 2
+    ResourceHolder.log.toSet() == ['A', 'B'].toSet()
+    instance.aField == 'a'
+    instance.bField == 'b'
   }
 }

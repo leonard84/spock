@@ -17,7 +17,8 @@ package org.spockframework.smoke.traits
 
 import java.util.concurrent.atomic.AtomicLong
 
-/** Shared state used by embedded trait specs to signal that cleanup ran. */
+/** Shared state used by embedded trait specs to observe cleanup and initializer behavior. */
 class ResourceHolder {
-  static CountDownLatch LATCH = new CountDownLatch(1)
+  static final AtomicLong counter = new AtomicLong()
+  static final List<String> log = new ArrayList<>()
 }
